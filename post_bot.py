@@ -1,6 +1,8 @@
 import os
 import datetime
 from lightsteem.client import Client
+# FIX 1: Import the Operation data structure needed for broadcasting
+from lightsteem.datastructures import Operation
 
 # 1. Configuration variables
 MY_ACCOUNT = "bnwt"  
@@ -57,8 +59,10 @@ try:
         "json_metadata": {"tags": CUSTOM_TAGS}
     }
     
-    # Direct broadcast execution command format
-    client.broadcast("comment", post_data)
+    # FIX 2: Package the comment dictionary inside an Operation object before passing to client.broadcast
+    op = Operation("comment", post_data)
+    client.broadcast(op)
+    
     print("SUCCESS: Post has bypassed the firewall and published to Steem!")
 
 except Exception as e:
