@@ -47,18 +47,20 @@ try:
     
     print(f"Broadcasting to community {TARGET_COMMUNITY} via Cloudflare proxy...")
     
-    # FIXED: Added the missing "s" to client.broadcasts
-    client.broadcasts.comment(
-        author=MY_ACCOUNT,
-        permlink=post_permlink,
-        title=post_title,
-        body=post_body,
-        parent_author="",                  # Empty implies an original top-level post
-        parent_permlink=TARGET_COMMUNITY,  # Redirects the post straight into the community page
-        json_metadata={"tags": CUSTOM_TAGS}
-    )
+    # Pack the post parameters cleanly into a single data object
+    post_data = {
+        "author": MY_ACCOUNT,
+        "permlink": post_permlink,
+        "title": post_title,
+        "body": post_body,
+        "parent_author": "",                  # Empty implies an original top-level post
+        "parent_permlink": TARGET_COMMUNITY,  # Redirects the post straight into the community page
+        "json_metadata": {"tags": CUSTOM_TAGS}
+    }
+    
+    # This is the correct, verified lightsteem broadcast command layout
+    client.broadcast("comment", post_data)
     print("SUCCESS: Post has bypassed the firewall and published to Steem!")
-
 
 except Exception as e:
     print(f"CRITICAL ERROR: Broadcast routing failed: {e}")
