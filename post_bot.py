@@ -59,9 +59,23 @@ try:
         "json_metadata": {"tags": CUSTOM_TAGS}
     }
     
-    # FIX 2: Package the comment dictionary inside an Operation object before passing to client.broadcast
+    # Pack into operation object
     op = Operation("comment", post_data)
-    client.broadcast(op)
+    
+    # FORCE SYNC: Get dynamic global properties to ensure exact blockchain alignment
+    props = client.get_dynamic_global_properties()
+    ref_block_num = props['head_block_number'] & 0xFFFF
+    
+    # Extract structural block ID prefix bytes manually to dodge internal bad cast bugs
+    ref_block_id = props['head_block_id']
+    ref_block_prefix = int(ref_block_id[14:22], 16)
+    
+    # Broadcast with hardcoded structural block anchoring specs
+    client.broadcast(
+        op, 
+        ref_block_num=ref_block_num, 
+        ref_block_prefix=ref_block_prefix
+    )
     
     print("SUCCESS: Post has bypassed the firewall and published to Steem!")
 
