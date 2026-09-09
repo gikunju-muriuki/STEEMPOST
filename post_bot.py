@@ -1,8 +1,7 @@
 import os
 import datetime
-from lightsteem.client import Client
-# FIX 1: Import the Operation data structure needed for broadcasting
-from lightsteem.datastructures import Operation
+from beem import Steem
+from beem.comment import Comment
 
 # 1. Configuration variables
 MY_ACCOUNT = "bnwt"  
@@ -40,41 +39,27 @@ post_title = f"আজকের দিন, আজকের আশীর্বা�
 post_body = f"নতুন দিন, নতুন আশীর্বাদ! {formatted_date}\n\nGitHub এবং Cloudflare Workers দ্বারা চালিত।"
 post_permlink = f"daily-blessing-{datetime.datetime.utcnow().strftime('%Y%m%d%H%M')}"
 
-# 3. Connect using direct structural processing entries
+# 3. Connect and broadcast using standard Beem structures
 try:
-    client = Client(
-        nodes=[PROXY_URL],
+    print(f"Connecting to node via Cloudflare proxy: {PROXY_URL}")
+    
+    # Initialize the robust Steem client
+    stm = Steem(
+        node=[PROXY_URL],
         keys=[MY_PRIVATE_POSTING_KEY]
     )
     
-    print(f"Broadcasting to community {TARGET_COMMUNITY} via Cloudflare proxy...")
+    print(f"Broadcasting to community {TARGET_COMMUNITY}...")
     
-    post_data = {
-        "author": MY_ACCOUNT,
-        "permlink": post_permlink,
-        "title": post_title,
-        "body": post_body,
-        "parent_author": "",                  
-        "parent_permlink": TARGET_COMMUNITY,  
-        "json_metadata": {"tags": CUSTOM_TAGS}
-    }
-    
-    # Pack into operation object
-    op = Operation("comment", post_data)
-    
-    # FORCE SYNC: Get dynamic global properties to ensure exact blockchain alignment
-    props = client.get_dynamic_global_properties()
-    ref_block_num = props['head_block_number'] & 0xFFFF
-    
-    # Extract structural block ID prefix bytes manually to dodge internal bad cast bugs
-    ref_block_id = props['head_block_id']
-    ref_block_prefix = int(ref_block_id[14:22], 16)
-    
-    # Broadcast with hardcoded structural block anchoring specs
-    client.broadcast(
-        op, 
-        ref_block_num=ref_block_num, 
-        ref_block_prefix=ref_block_prefix
+    # Post directly using the standard, tested blockchain structure wrapper
+    stm.post(
+        title=post_title,
+        body=post_body,
+        author=MY_ACCOUNT,
+        permlink=post_permlink,
+        tags=CUSTOM_TAGS,
+        parent_author="",
+        parent_permlink=TARGET_COMMUNITY
     )
     
     print("SUCCESS: Post has bypassed the firewall and published to Steem!")
