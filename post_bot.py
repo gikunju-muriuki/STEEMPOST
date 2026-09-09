@@ -3,13 +3,13 @@ import datetime
 from lightsteem.client import Client
 
 # 1. Configuration variables
-MY_ACCOUNT = "bnwt"  # Changed to the posting account shown in your image
-TARGET_COMMUNITY = "hive-129948"  # Dynamic target community id
+MY_ACCOUNT = "bnwt"
+TARGET_COMMUNITY = "hive-129948" 
 CUSTOM_TAGS = ["steemexclusive", "amarbanglablog", "general-writing", "krsuccess"]
 
 # 2. Extract configuration from GitHub Secrets
 MY_PRIVATE_POSTING_KEY = os.getenv("STEEM_POSTING_KEY")
-PROXY_URL = "https://workers.dev"  # <-- PASTE YOUR WORKER URL HERE
+PROXY_URL = "https://steem-proxy.gikunju.workers.dev/"  # <-- Worker
 
 if not MY_PRIVATE_POSTING_KEY:
     print("Error: STEEM_POSTING_KEY secret is missing!")
