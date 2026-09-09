@@ -9,7 +9,7 @@ CUSTOM_TAGS = ["steemexclusive", "amarbanglablog", "general-writing", "krsuccess
 
 # 2. Extract configuration from GitHub Secrets
 MY_PRIVATE_POSTING_KEY = os.getenv("STEEM_POSTING_KEY")
-PROXY_URL = "https://steem-proxy.workers.dev"  # Your worker endpoint
+PROXY_URL = "https://steem-proxy.gikunju.workers.dev"  # Your worker endpoint
 
 if not MY_PRIVATE_POSTING_KEY:
     print("Error: STEEM_POSTING_KEY secret is missing!")
