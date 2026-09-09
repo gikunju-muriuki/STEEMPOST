@@ -47,8 +47,8 @@ try:
     
     print(f"Broadcasting to community {TARGET_COMMUNITY} via Cloudflare proxy...")
     
-    # Broadcast post structure
-    client.broadcast.comment(
+    # FIXED: Added the missing "s" to client.broadcasts
+    client.broadcasts.comment(
         author=MY_ACCOUNT,
         permlink=post_permlink,
         title=post_title,
@@ -58,6 +58,7 @@ try:
         json_metadata={"tags": CUSTOM_TAGS}
     )
     print("SUCCESS: Post has bypassed the firewall and published to Steem!")
+
 
 except Exception as e:
     print(f"CRITICAL ERROR: Broadcast routing failed: {e}")
