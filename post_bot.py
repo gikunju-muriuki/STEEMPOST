@@ -36,7 +36,7 @@ formatted_date = generate_custom_date()
 
 # Content structure in Bangla
 post_title = f"আজকের দিন, আজকের আশীর্বাদ! - {formatted_date}"
-post_body = f"নতুন দিন, নতুন আশীর্বাদ! {formatted_date}\n\n@bnwt"
+post_body = f"নতুন দিন, নতুন আশীর্বাদ! {formatted_date}\n\nhttps://cdn.steemitimages.com/DQmeU8jsozizA9YjHdEYKnrUYPQb3kYoNgQxnJPUu5QdBBQ/1000021988.jpg"
 post_permlink = f"daily-blessing-{datetime.datetime.utcnow().strftime('%Y%m%d%H%M')}"
 
 # 3. Connect and broadcast using standard Beem structures
@@ -62,7 +62,7 @@ try:
         parent_permlink=TARGET_COMMUNITY
     )
     
-    print("SUCCESS: Post has bypassed the firewall and published to Steem!")
+    print("Post has been published.")
 
 except Exception as e:
     print(f"CRITICAL ERROR: Broadcast routing failed: {e}")
