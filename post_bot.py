@@ -36,7 +36,7 @@ formatted_date = generate_custom_date()
 
 # Content structure in Bangla
 post_title = f"আজকের দিন, আজকের আশীর্বাদ! - {formatted_date}"
-post_body = f"নতুন দিন, নতুন আশীর্বাদ! {formatted_date}\n\nGitHub এবং Cloudflare Workers দ্বারা চালিত।"
+post_body = f"নতুন দিন, নতুন আশীর্বাদ! {formatted_date}\n\n@bnwt"
 post_permlink = f"daily-blessing-{datetime.datetime.utcnow().strftime('%Y%m%d%H%M')}"
 
 # 3. Connect and broadcast using standard Beem structures
