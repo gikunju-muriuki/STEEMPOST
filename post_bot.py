@@ -5,7 +5,7 @@ from beem.comment import Comment
 
 # 1. Configuration variables
 MY_ACCOUNT = "bnwt"  
-TARGET_COMMUNITY = "hive-129948"  
+TARGET_COMMUNITY = "আমার বাংলা ব্লগ"  
 CUSTOM_TAGS = ["steemexclusive", "amarbanglablog", "general-writing", "krsuccess"]
 
 # 2. Extract configuration from GitHub Secrets
@@ -57,7 +57,7 @@ try:
         body=post_body,
         author=MY_ACCOUNT,
         permlink=post_permlink,
-        tags=CUSTOM_TAGS,
+        tags=[TARGET_COMMUNITY] + CUSTOM_TAGS,
         parent_author="",
         parent_permlink=TARGET_COMMUNITY
     )
