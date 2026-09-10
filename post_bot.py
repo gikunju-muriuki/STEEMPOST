@@ -5,7 +5,7 @@ from beem.comment import Comment
 
 # 1. Configuration variables
 MY_ACCOUNT = "bnwt"  
-TARGET_COMMUNITY = "আমার বাংলা ব্লগ"  
+TARGET_COMMUNITY = "hive-129948"  
 CUSTOM_TAGS = ["steemexclusive", "amarbanglablog", "general-writing", "krsuccess"]
 
 # 2. Extract configuration from GitHub Secrets
