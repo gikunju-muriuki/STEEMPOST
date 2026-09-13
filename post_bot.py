@@ -35,8 +35,8 @@ def generate_custom_date():
 formatted_date = generate_custom_date()
 
 # Content structure in Bangla
-post_title = f"আজকের দিন, আজকের আশীর্বাদ! - {formatted_date}"
-post_body = f"নতুন দিন, নতুন আশীর্বাদ! {formatted_date}\n\nhttps://cdn.steemitimages.com/DQmeU8jsozizA9YjHdEYKnrUYPQb3kYoNgQxnJPUu5QdBBQ/1000021988.jpg"
+post_title = f"🐈‍⬛কিটি গ্যাং🐾"
+post_body = f"আরও পুসি 😺, আরও রস 🧃! {formatted_date}\n\nhttps://cdn.steemitimages.com/DQmVNXDdA1bCBGRZ2azkVdi7q19aupXoryQPnvzDXKWES3q/1000022551.jpg"
 post_permlink = f"daily-blessing-{datetime.datetime.utcnow().strftime('%Y%m%d%H%M')}"
 
 # 3. Connect and broadcast using standard Beem structures
