@@ -6,9 +6,9 @@ from beem.comment import Comment
 # 1. Configuration variables
 MY_ACCOUNT = "bnwt"  
 TARGET_COMMUNITY = "hive-129948"  
-CUSTOM_TAGS = ["steemexclusive", "amarbanglablog", "general-writing", "krsuccess"]
+CUSTOM_TAGS = ["steemexclusive", "amarbanglablog", "general-writing", "art", "meme", "trc-20", "sunpump", "puss", "krsuccess"]
 
-# 2. Extract configuration from GitHub Secrets
+# The specific account receiving 100% of the rewards
 MY_PRIVATE_POSTING_KEY = os.getenv("STEEM_POSTING_KEY")
 PROXY_URL = "https://steem-proxy.gikunju.workers.dev"  # Your worker endpoint
 
