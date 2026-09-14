@@ -2,8 +2,8 @@ name: Steem Daily Posting Bot
 
 on:
   schedule:
-    # Runs everyday at 12:00 PM EAT
-    - cron: '3 9 * * *'
+    # Runs everyday at 12:00 AM EAT
+    - cron: '00 09 * * *'
   workflow_dispatch: # Allows manual trigger execution button in GitHub
 
 jobs:
