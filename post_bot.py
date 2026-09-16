@@ -151,17 +151,17 @@ ARTICLES_POOL = {
     },
     26: {
         "title": "The Loneliness Epidemic and the Need for Connection",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmSmk3hKKZVux1vqSccPM84U6yHZH8yDtynJdNPbS1ufx8/1000022719.jpg",
         "body": "Despite being more digitally connected than any generation in human history, many people report feeling deeply isolated. Social media interactions often act as a poor substitute for genuine, authentic human relationships.\n\nReach out to an old friend or family member today via a direct phone call or a meaningful message. Investing a few minutes into maintaining your personal support network pays massive dividends for your mental health."
     },
     27: {
         "title": "How Embracing Constraints Fuels Real Innovation",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmXxdzpwdjXmcFJsD9sDUbTC2CXr8mnRHQv4yxJCqprzPk/1000022721.jpg",
         "body": "We often complain about limitations like a lack of time, tight budgets, or minimal resources when working on projects. However, absolute freedom can cause creative paralysis, while clear constraints force us to think innovatively.\n\nInstead of viewing your current limitations as a barrier today, look at them as a creative sandbox. Use your lack of resources as inspiration to find a completely unique, highly resourceful path forward."
     },
     28: {
         "title": "Cultivating Genuine Gratitude During Difficult Times",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmagUVeQJNoT9USdo1RXjK2pNEAL3QkCFea85VEJYmWDQs/1000022720.jpg",
         "body": "Practicing gratitude isn't about wearing toxic positivity glasses or ignoring the very real challenges of your life. It is simply about intentionally training your brain to see the good things that exist right alongside the struggles.\n\nBefore you go to bed tonight, note three specific things that brought a smile to your face today. Shifting your focus to what is working well reduces stress chemicals and improves your overall sleep quality."
     },
     29: {
