@@ -104,25 +104,24 @@ ARTICLES_POOL = {
         "image": "https://cdn.steemitimages.com/DQmUzhBJBrxyYxqV71UHQsXSvPAP7vVToKCJHpn9TgKWjqd/1000022709.jpg",
         "body": "Vague desires like 'wanting to save money' rarely lead to lasting behavioral changes. True financial empowerment begins when you define exact, measurable targets—such as building a specific three-month emergency fund or outlining a clear debt repayment timeline.\n\nTake fifteen minutes today to write down one concrete financial milestone for the upcoming year. Breaking this target down into precise monthly or weekly contributions transforms an intimidating mountain into a clear, manageable roadmap."
     },
-
     17: {
         "title": "Embracing the Uncomfortable Journey of Personal Growth",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmaR5iWD561aK73j45LhwiLRmJY98ahAc6gP34viadLC3u/1000022710.jpg",
         "body": "Real personal growth never happens inside the cozy, familiar boundaries of our comfort zones. True progress requires us to step out into the awkward, uncertain spaces where failure and learning coexist.\n\nChoose one task or conversation you have been actively avoiding because it feels slightly uncomfortable or intimidating. Confront it directly today, knowing that enduring temporary discomfort is how you expand your personal capabilities."
     },
     18: {
         "title": "How Physical Movement Boosts Daily Brain Power",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmTUzNxhgViGn4kpP3pSHdAM2e8XmAvqjwtKDfZ9hVD8AQ/1000022711.jpg",
         "body": "Our bodies and minds are deeply interconnected systems that constantly influence one another's performance. Sitting motionless at a desk for long stretches reduces blood flow to the brain, causing sluggish thinking and fatigue.\n\nBreak up your sedentary blocks today by standing up to stretch or walking around every single hour. Even two minutes of light physical movement re-oxygenates your system, instantly boosting your focus, mood, and productivity."
     },
     19: {
         "title": "Shifting Focus From Final Outcomes to Daily Systems",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmaL2iSSenuKZkWHrWhrh78ZvxGPhXqCqEHo2QLzZyFf2i/1000022712.jpg",
         "body": "Fixating purely on a distant goal can leave you feeling discouraged by how far you still have left to go. Winners and losers often share the exact same goals; it is the daily system execution that separates them.\n\nForget about the ultimate endpoint for a moment and focus entirely on executing your routine perfectly today. Trust that if your daily systems are solid, the desired results will naturally take care of themselves over time."
     },
     20: {
         "title": "The Life-Changing Magic of Keeping a Workspace Clean",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmRhWtNiV58rnU2z1CbsU5M4T8Y2563FS4kRsJidALpJrF/1000022713.jpg",
         "body": "A physical environment filled with scattered papers, empty cups, and random objects creates subtle, constant mental friction. It forces your brain to expend energy filtering out visual distractions, lowering your overall working memory capacity.\n\nBefore you start your primary tasks today, clear everything off your desk except for the absolute essentials. You will immediately notice a lighter mental load and an increased ability to lock into your deep work blocks."
     },
     21: {
