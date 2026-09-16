@@ -126,12 +126,12 @@ ARTICLES_POOL = {
     },
     21: {
         "title": "Cultivating Patience in an Era of Instant Gratification",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmcM8idjKHLcGrQvDDHYZGhqfd3DJcE8cuP7bgLaMLE6Vn/1000022714.jpg",
         "body": "We live in an on-demand world where fast delivery, instant streams, and quick replies have warped our expectations. Because we get minor things instantly, we mistakenly expect major life transformations to happen overnight as well.\n\nRemind yourself today that worthwhile things like career mastery, deep relationships, and physical fitness require time. Embrace the slow, steady process and practice patience when things don't yield immediate results."
     },
     22: {
         "title": "The Strategic Value of Conducting Regular Self-Reviews",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmUf7cBsP3N1VUuUcyXosroc8K8syAeUTo4LpMEkuNf4U2/1000022715.jpg",
         "body": "It is incredibly easy to stay endlessly busy while inadvertently moving in completely the wrong direction. Without regular periods of self-reflection, we repeat ineffective habits and lose track of our core priorities.\n\nSet aside a brief window at the end of this week to review what went well and what felt draining. Use these insights to make small adjustments to your schedule, ensuring your daily actions stay aligned with your values."
     },
     23: {
