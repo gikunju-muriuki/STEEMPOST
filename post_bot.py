@@ -136,17 +136,17 @@ ARTICLES_POOL = {
     },
     23: {
         "title": "Learning to Say No with Ultimate Confidence and Grace",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmcmchob83PY1kU8aSJhLVWHPLJuQP2v9uCA38UAy5NZ1N/1000022716.jpg",
         "body": "Every time you say yes to a non-essential request, you are automatically saying no to your own top priorities. People-pleasing might feel kind in the moment, but it ultimately leads to resentment and severe personal burnout.\n\nWhen someone asks for your time today, check your true capacity before giving an answer. It is entirely acceptable to deliver a polite, honest refusal in order to preserve your focus for your core commitments."
     },
     24: {
         "title": "Unlocking Creative Solutions Through Critical Thinking",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmNuCAKJtopL4cXK8FRvrxQKBwVawxFfXKG9htdY6o4oNK/1000022717.jpg",
         "body": "When faced with an unexpected obstacle, our default response is often to panic or rely on outdated habits. Critical thinking involves stepping back, challenging assumptions, and looking at the core problem from entirely new angles.\n\nIf you hit a roadblock today, don't just force your way through using the same old tired methods. Ask yourself how an outsider would solve this, and look for a more efficient, elegant workaround."
     },
     25: {
         "title": "Developing a Grounded Perspective on Perfectionism",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmTyjc2tER6G3KqWeF5PJiQnwubkTt3x2QzRDiD7AxrGw2/1000022718.jpg",
         "body": "Perfectionism is frequently an elegant mask for fear—fear of criticism, fear of failure, or fear of not being good enough. Chasing perfection stalls projects indefinitely, preventing valuable real-world feedback and iteration.\n\nAim for excellent execution rather than flawless perfection in your work today. Remember that a completed project out in the world is infinitely more useful and impactful than a perfect project hidden away in a drawer."
     },
     26: {
