@@ -171,17 +171,17 @@ ARTICLES_POOL = {
     },
     30: {
         "title": "The Direct Connection Between Sleep and Daily Success",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmS5bLUhfknbC9AwJUwuSfN4CkMbWL1XhUkHEofrg5fNkK/1000022742.jpg",
         "body": "Cutting back on sleep to gain extra working hours is a classic trap that rapidly destroys your cognitive processing. Chronic sleep deprivation ruins your mood, kills creativity, and leads to critical decision-making mistakes.\n\nCommit to a relaxing evening wind-down routine tonight by turning off electronic screens thirty minutes before bed. Prioritizing high-quality rest ensures you wake up tomorrow with maximum focus and physical energy."
     },
     31: {
         "title": "Celebrating Your Incremental Progress Over Time",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmfTuHnesHUmuukL16J81LGo7kCB3T6VCTHZfjJeXCt7fw/1000022743.jpg",
         "body": "We are often so entirely focused on the mountain peak ahead that we forget to look back and see how far we climbed. Forgetting to acknowledge your milestones makes the journey feel like an endless, grueling chore.\n\nTake a moment today to recognize a skill or habit you handle easily now that used to challenge you last year. Appreciating your own personal evolution builds the deep internal confidence needed to tackle your next big goal."
     },
     32: {
         "title": "Developing Ultimate Trust in Your Unique Lifepath",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmRcbTSiX3thngfU1ybA4bvLYeKVkbbBhMCT7A6FRN75Eb/1000022744.jpg",
         "body": "Constantly comparing your milestones to other people's curated social media feeds is a recipe for deep unhappiness. Everyone operates on an entirely unique timeline, shaped by completely different circumstances and goals.\n\nFocus your competitive energy purely on outperforming the person you were yesterday afternoon. Trusting your unique process keeps you grounded, motivated, and fully focused on maximizing your own potential."
     }
     }
