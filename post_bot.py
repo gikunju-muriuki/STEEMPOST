@@ -26,47 +26,47 @@ if not MY_PRIVATE_POSTING_KEY:
 ARTICLES_POOL = {
     1: {
         "title": "Embracing Fresh Beginnings and New Opportunities",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmaoTkXWbJoxqQvGZLd4BSF1rmbSsqWUNhspxXoH9SSM6S/1000022690.jpg",
         "body": "Every single sunrise brings a silent invitation to reset our goals and leave past setbacks behind. It is easy to get caught up in yesterday's mistakes, but true growth happens when we focus entirely on the present moment.\n\nTake a few minutes today to list three small things you want to achieve. By breaking down your broader ambitions into daily, actionable steps, you build a sustainable momentum that naturally propels you forward."
     },
     2: {
         "title": "The Power of Intentional Daily Micro-Habits",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmaLnDaUxmzXGKAuTNtULkYUE9aad5LnPPvLffSJB9F82N/1000022691.jpg",
         "body": "We often underestimate the massive impact that tiny, daily choices have on our long-term success. Reading just five pages of a book or stretching for ten minutes might feel insignificant in the moment, but consistency multiplies these actions over time.\n\nExamine your current morning routine and see where you can slip in one healthy micro-habit. Commit to practicing it without fail today, and watch how it subtly shifts your energy and focus."
     },
     3: {
         "title": "Cultivating Mindful Awareness in a Busy World",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmWtziQ9RGQLpmZPtb8mU6GEZCwABe6x2idCZFxaAkCVoZ/1000022692.jpg",
         "body": "Modern life constantly pulls our attention in a thousand directions, leaving us feeling scattered and drained. Cultivating mindfulness doesn't mean sitting in silence for hours; it simply means being fully anchored where your feet are right now.\n\nTry to eat your next meal or drink your coffee without looking at a digital screen. Pay attention to the textures, temperatures, and tastes, allowing your nervous system a much-needed moment to rest and recalibrate."
     },
     4: {
         "title": "Finding Deep Creative Inspiration in Quiet Spaces",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmNPUz7L3GwkpnCrpRz5Vddkt9fuLdF6iSyoU9YpLF2qvT/1000022693.jpg",
         "body": "Inspiration rarely strikes when our minds are cluttered with notifications, chores, and endless digital noise. True creative breakthroughs usually happen during the quiet, unstructured gaps of our day when thoughts are free to wander.\n\nStep away from your desk today and take a short walk without your headphones or phone. Let your surroundings fill your senses naturally, and you might be surprised by the fresh ideas that bubble to the surface."
     },
     5: {
         "title": "The Crucial Balance Between Hard Work and Rest",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmeSRJNKRgct5GePYCZugKeN2wdsV6bv5rP9ePGQ3UUojh/1000022694.jpg",
         "body": "Society heavily glorifies the constant hustle, but chronic exhaustion is never a sustainable strategy for true success. Rest is not a reward you have to earn after collapsing; it is a fundamental requirement for peak performance.\n\nTreat your downtime with the exact same respect you give to your most important professional business meetings. Schedule an hour this evening purely for relaxation, ensuring your mind and body can genuinely recover."
     },
     6: {
         "title": "Nurturing Professional Growth Through Active Learning",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmSzQKFVTCXgYyjPMkZWCqPgiFmVP9b2p1pyrjregP6x4T/1000022695.jpg",
         "body": "The landscape of work and technology changes so rapidly that stagnant skills quickly become obsolete. Dedicating yourself to lifelong learning is the absolute best insurance policy for your future career and personal development.\n\nFind a short educational article, podcast episode, or tutorial video related to your field today. Invest just fifteen minutes into absorbing that content and consider how you can apply it directly to your current projects."
     },
     7: {
         "title": "Building Resilience Against Life's Unexpected Hurdles",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmVbdHEfirRrNHiNUeeYJ9ZRAizpecDhSrKWgNfWxERso9/1000022696.jpg",
         "body": "Challenges and disruptions are completely unavoidable, but our emotional response to them remains entirely under our control. Developing resilience isn't about ignoring hardships; it is about learning how to adapt and bounce back faster.\n\nWhen a minor frustration happens today, pause and ask yourself if this issue will matter in five weeks. Shifting your timeline perspective instantly dilutes stress and helps you approach problem-solving with a calm, clear mind."
     },
     8: {
         "title": "The Overlooked Value of Practicing Active Listening",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmUm4SPqzsFnJFqxUcyfLWcpBshc5WwRctaELwq5sxFnx4/1000022697.jpg",
         "body": "Most people do not listen with the intent to understand; they listen solely with the intent to reply. True connection and deep collaboration happen when we quiet our inner monologues and completely focus on the speaker's words.\n\nIn your conversations today, challenge yourself to let the other person finish their thoughts entirely before you speak. Ask thoughtful follow-up questions instead of immediately shifting the topic back to your own experiences."
     },
     9: {
         "title": "Decluttering Your Digital Environment for Mental Clarity",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmTSUK72sd8y7xdyzjjvX89B5xsonqsayJsAmU8yi3wtz4/1000022699.jpg",
         "body": "A messy digital workspace can cause just as much subconscious anxiety and distraction as a cluttered physical desk. Overflowing email inboxes, unorganized desktop files, and useless notifications constantly fragment our cognitive focus.\n\nSpend ten minutes today unsubscribing from newsletters you no longer read and deleting old files. A streamlined digital environment creates an immediate sense of mental clarity and makes your daily workflow much smoother."
     },
     10: {
@@ -76,32 +76,34 @@ ARTICLES_POOL = {
     },
     11: {
         "title": "The Subtle Art of Protecting Your Personal Energy",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQme7XoodSLN2Z9mKgh72U6S9wbg2RWQSAqvtmieJECjuhS/1000022700.jpg",
         "body": "Your time and emotional energy are finite resources that must be managed with great care every day. Saying yes to every single request or absorbing other people's chronic negativity leaves you with nothing left for yourself.\n\nPractice setting polite but firm boundaries today regarding your schedule and mental availability. Protecting your personal peace ensures that you can bring your best, most authentic self to the things that truly matter."
     },
     12: {
         "title": "Finding Deep Fulfillment in Simple Daily Pleasures",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmbqHXa2687McMdkSZQwsc8HmJwqrko4mLddUdaEkvL2py/1000022702.jpg",
         "body": "It is incredibly easy to spend our lives waiting for monumental milestones to finally feel happy and content. However, true life satisfaction is actually built from noticing and savoring minor, everyday moments of joy.\n\nWhether it is the warmth of morning sunlight, a great cup of tea, or a pleasant laugh with a coworker, lean into it. Pause for ten seconds to fully appreciate these simple pleasures as they happen throughout your afternoon."
     },
     13: {
         "title": "Overcoming Procrastination by Simplifying the First Step",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmPwyNkp8Ya6hUwK2dnWSx9VuTr5QQn5PGMGLHRC29BdcV/1000022704.jpg",
         "body": "Procrastination is rarely caused by laziness; it is usually an emotional coping mechanism for a task that feels overwhelming. When a project seems too massive, our brains naturally look for immediate distractions to avoid the discomfort.\n\nTricked by size, break your toughest task today down into a step so ridiculously small that it requires almost zero effort. Commit to working on just that single micro-step for five minutes, and let the initial friction dissolve."
     },
     14: {
         "title": "Curating Your Mind's Daily Information Diet",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmTSffmCd9weEvEKxxKUzWFHKhoH38B8FeTefjxrTbmTsT/1000022705.jpg",
         "body": "Just like the food we eat shapes our physical health, the media we consume shapes our psychological well-being. Consistently consuming sensationalized news and toxic social feeds creates a skewed, anxious outlook on reality.\n\nTake an honest inventory of the accounts and websites you visit most frequently throughout the week. Replace at least one negative source with educational content, inspiring essays, or community-focused platforms."
     },
     15: {
         "title": "The Ripple Effect of Small Acts of Kindness",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmcCqZV7g9JUFRWRdb55UycbaHppxx4xfzoZRvnkWrsbPz/1000022708.jpg",
         "body": "We often think we need to make grand, expensive gestures to positively impact the lives of the people around us. In reality, a genuine compliment, an open door, or a supportive text message can completely turn someone's day around.\n\nMake it a goal to deliver one unexpected expression of kindness or appreciation to someone today. These small actions create a beautiful ripple effect, lifting both the recipient's spirits and your own emotional state."
     },
     16: {
         "title": "The Power of Defining Clear Financial Goals",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmUzhBJBrxyYxqV71UHQsXSvPAP7vVToKCJHpn9TgKWjqd/1000022709.jpg",
+        "body": "Vague desires like 'wanting to save money' rarely lead to lasting behavioral changes. True financial empowerment begins when you define exact, measurable targets—such as building a specific three-month emergency fund or outlining a clear debt repayment timeline.\n\nTake fifteen minutes today to write down one concrete financial milestone for the upcoming year. Breaking this target down into precise monthly or weekly contributions transforms an intimidating mountain into a clear, manageable roadmap."
+    },
 
     17: {
         "title": "Embracing the Uncomfortable Journey of Personal Growth",
