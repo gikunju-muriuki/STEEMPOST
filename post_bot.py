@@ -166,7 +166,7 @@ ARTICLES_POOL = {
     },
     29: {
         "title": "The Invaluable Strength of True Emotional Maturity",
-        "image": "https://steemitimages.com",
+        "image": "https://cdn.steemitimages.com/DQmV8EkxzmQ84GA4fr13QAhP9TEYz3VL6GhBeD2YZFmWJTb/1000022722.jpg",
         "body": "Emotional maturity is defined by the critical gap between experiencing an intense emotion and choosing your reaction. Reacting impulsively out of anger or frustration almost always makes a difficult situation much worse.\n\nWhen someone tests your patience today, take one deep breath before saying a single word. Controlling your immediate reflex allows you to address the problem rationally and de-escalate tension effortlessly."
     },
     30: {
