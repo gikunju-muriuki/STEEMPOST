@@ -36,14 +36,14 @@ ARTICLES_POOL = {
         "body": "We often underestimate the massive impact that tiny, daily choices have on our long-term success. Reading just five pages of a book or stretching for ten minutes might feel insignificant in the moment, but consistency multiplies these actions over time.\n\nExamine your current morning routine and see where you can slip in one healthy micro-habit. Commit to practicing it without fail today, and watch how it subtly shifts your energy and focus."
     },
     3: {
-        "title": "Cultivating Mindful Awareness in a Busy World",
+        "title": "Finding Your Center Amidst the Daily Chaos",
         "image": "https://cdn.steemitimages.com/DQmWtziQ9RGQLpmZPtb8mU6GEZCwABe6x2idCZFxaAkCVoZ/1000022692.jpg",
-        "body": "Modern life constantly pulls our attention in a thousand directions, leaving us feeling scattered and drained. Cultivating mindfulness doesn't mean sitting in silence for hours; it simply means being fully anchored where your feet are right now.\n\nTry to eat your next meal or drink your coffee without looking at a digital screen. Pay attention to the textures, temperatures, and tastes, allowing your nervous system a much-needed moment to rest and recalibrate."
+        "body": "Between constant digital noise and endless to-do lists, it is easy to feel completely disconnected and exhausted by the end of the day. True mindfulness isn't about escaping to a quiet retreat; it is simply the practice of anchoring your awareness to the exact space you occupy right now.\n\nChallenge yourself to experience your next meal or warm drink completely offline. Notice the subtle flavors, the warmth in your hands, and the aroma around you—giving your mind a rare, uninterrupted window to reset."
     },
     4: {
-        "title": "Finding Deep Creative Inspiration in Quiet Spaces",
+        "title": "Unlocking Creative Breakthroughs Through Stillness",
         "image": "https://cdn.steemitimages.com/DQmNPUz7L3GwkpnCrpRz5Vddkt9fuLdF6iSyoU9YpLF2qvT/1000022693.jpg",
-        "body": "Inspiration rarely strikes when our minds are cluttered with notifications, chores, and endless digital noise. True creative breakthroughs usually happen during the quiet, unstructured gaps of our day when thoughts are free to wander.\n\nStep away from your desk today and take a short walk without your headphones or phone. Let your surroundings fill your senses naturally, and you might be surprised by the fresh ideas that bubble to the surface."
+        "body": "Brilliant ideas seldom arrive when our attention is buried under a flood of notifications, tasks, and constant online noise. Instead, real creative momentum builds during quiet, unstructured moments where our minds finally have the breathing room to explore.\n\nMake time to step away from your workspace today for a brief stroll entirely unplugged. By letting your senses absorb the environment without the distraction of audio or screens, you open the door for fresh perspectives to surface naturally."
     },
     5: {
         "title": "The Crucial Balance Between Hard Work and Rest",
