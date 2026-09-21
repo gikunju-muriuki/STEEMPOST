@@ -1,4 +1,3 @@
-"""
 import os
 import datetime
 from beem import Steem
@@ -246,4 +245,3 @@ try:
 except Exception as e:
     print(f"CRITICAL ERROR: Broadcast routing failed: {e}")
     exit(1)
-    """
