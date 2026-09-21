@@ -7,7 +7,7 @@ from beem.comment import Comment
 # ==========================================
 # 1. CONFIGURATION VARIABLES
 # ==========================================
-MY_ACCOUNT = "bnwt"  
+MY_ACCOUNT = "blog.god"  
 TARGET_COMMUNITY = "hive-129948"  
 CUSTOM_TAGS = ["writing", "steemexclusive", "article", "krsuccess"]
 
