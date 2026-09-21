@@ -8,7 +8,7 @@ from beem.comment import Comment
 # ==========================================
 MY_ACCOUNT = "blog.god"  
 TARGET_COMMUNITY = "hive-129948"  
-CUSTOM_TAGS = ["writing", "steemexclusive", "article", "krsuccess"]
+CUSTOM_TAGS = ["blog", "krsuccess"]
 
 # ========================================================
 # 2. The specific account receiving 100% of the rewards
