@@ -211,22 +211,23 @@ article = ARTICLES_POOL[selected_index]
 post_title = f"{article['title']} — {formatted_date}"
 post_body = f"{article['body']}\n\n{article['image']}"
 
-# SLUG-BASED PERMLINK LOGIC
-# 1. Transform the title to lowercase
+# ==========================================
+# 4. SLUG-BASED PERMLINK LOGIC
+# ==========================================
 raw_slug = article['title'].lower()
 
-# 2. Strip special characters out safely using basic loop strings to avoid import crashes
+# Strip special characters safely using standard loops to avoid runtime crashes
 clean_chars = [char if char.isalnum() or char.isspace() else "" for char in raw_slug]
 
-# 3. Clean up formatting spaces and join strings using standard hyphens
+# Clean up formatting spaces and join strings using standard hyphens
 slug_str = "-".join("".join(clean_chars).split())
 
-# 4. Final dynamic URL string mapping output
-post_permlink = f"daily-insight-day-{selected_index}-{now_eat.strftime('%Y%m%d')}"
-  
+# Final dynamic human-like URL string mapping output
+post_permlink = f"{slug_str}-{now_eat.strftime('%Y%m%d')}"
+
 
 # ==========================================
-# 5. Connect and broadcast to blockchain
+# 6. Connect and broadcast to blockchain
 # ==========================================
 
 try:
