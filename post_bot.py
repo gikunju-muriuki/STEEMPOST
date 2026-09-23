@@ -45,10 +45,10 @@ IMAGE_MATRIX = {
         "https://cdn.steemitimages.com/DQmX4F4oZtAYv8TXvoripjNxzw1YWn5BnGwb3DJCJHpFmRC/1000024877.jpg" 
     ],
     'xrp': [
-        "https://steemitimages.com",
-        "https://steemitimages.com",
-        "https://steemitimages.com",
-        "https://steemitimages.com"
+        "https://cdn.steemitimages.com/DQmeLCBSXQtxgudkdAarnH9u2U9qAQsJYsVZ3RaeLuyyTZ1/1000024886.jpg", 
+        "https://cdn.steemitimages.com/DQmdc4oUuB4gHpeL2DoD5xZZc7EiEFeGtsUYhRH4EoSiQEh/1000024885.jpg", 
+        "https://cdn.steemitimages.com/DQmXpKpPXpHWWM5UyVo4adFboRwFLXCNGQhSKyLciUxzTny/1000024884.jpg", 
+        "https://cdn.steemitimages.com/DQmTxJR9qrXqhGWVQZz8XHab5gn6RaTHm7VFkHvkDmtpM8H/1000024883.jpg"
     ],
     'sol': [
         "https://steemitimages.com",
