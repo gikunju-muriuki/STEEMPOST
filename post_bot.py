@@ -204,10 +204,34 @@ def format_row(key):
     price_str = f"${coin['price']:,}" if coin['price'] >= 1 else f"${coin['price']:.4f}"
     return f"* 🪙 **{coin['name']} ({key.upper()}):** {price_str} | {emoji}{coin['change']:.2f}%"
 
-post_title = f"Crypto Pulse Market Overview — {formatted_date}"
+# A pool of unique human-written title prefixes to break structural repetitions
+title_variations = [
+    "Crypto Pulse Market Overview",
+    "Daily Crypto Market Tracker",
+    "Digital Asset Pulse And Trends Ledger",
+    "Crypto Market Intelligence Update"
+]
+selected_prefix = random.choice(title_variations)
+post_title = f"{selected_prefix} — {formatted_date}"
 
+# ==========================================
+# 5. DYNAMIC TITLE-BASED PERMLINK SLUG LOGIC
+# ==========================================
+# 1. Transform the randomly chosen prefix to lowercase
+raw_slug = selected_prefix.lower()
+# 2. Safely strip special characters using basic loop text filtering
+clean_chars = [char if char.isalnum() or char.isspace() else "" for char in raw_slug]
+# 3. Clean up spaces and join strings using standard hyphens
+slug_str = "-".join("".join(clean_chars).split())
+# 4. Combine the dynamic prefix slug with the current date to guarantee uniqueness
+post_permlink = f"{slug_str}-{now_eat.strftime('%Y%m%d')}"
+
+print(f"🔗 Dynamic Title Generated: '{post_title}'")
+print(f"🔗 Matching Permlink Slug compiled: '{post_permlink}'")
+
+# Compile the final Markdown text array payload
 body_lines = [
-    f"### 📈 Crypto Pulse Report — {formatted_date}\n",
+    f"### 📈 {selected_prefix} — {formatted_date}\n",
     "Daily analytical tracking data for top-tier cryptocurrency assets compiled seamlessly using lightweight text parameters:\n",
     format_row('btc'),
     format_row('eth'),
@@ -218,8 +242,6 @@ body_lines = [
     f"![Market Performance Header Area]({selected_display_image})"
 ]
 post_body = "\n".join(body_lines)
-post_permlink = f"crypto-pulse-report-{now_eat.strftime('%Y%m%d')}"
-
 
 # ==========================================
 # 5. BLOCKCHAIN TRANSMISSION HANDSHAKE
