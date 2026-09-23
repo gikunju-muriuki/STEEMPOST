@@ -81,7 +81,7 @@ if not data_acquired:
     print("Secondary Pipeline: Fetching live data from CryptoCompare API...")
     try:
         # Validated pricing API url string query parameters
-        cc_url = "https://cryptocompare.com"
+        cc_url = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC&tsyms=USD"
         req = urllib.request.Request(cc_url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, timeout=10) as response:
             raw_json = json.loads(response.read().decode())
