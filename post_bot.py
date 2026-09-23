@@ -102,7 +102,7 @@ if not data_acquired:
 if not data_acquired:
     print("Tertiary Pipeline: Fetching live data from CoinPaprika API...")
     try:
-        paprika_url = "https://coinpaprika.com"
+        paprika_url = "https://api.coinpaprika.com/v1/tickers"
         req = urllib.request.Request(paprika_url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, timeout=12) as response:
             raw_json = json.loads(response.read().decode())
