@@ -26,17 +26,17 @@ CUSTOM_TAGS = ["crypto", "xrp", "eth", "bnb", "sol", "btc", "krsuccess"]
 # 20 Hardcoded ultra-low RC asset images mapped explicitly (4 per coin asset category)
 IMAGE_MATRIX = {
     'btc': [
-        "https://cdn.steemitimages.com/DQmc1LphNvohBCUsroZ9zjRuL3VzaVJfMVN9oN8hDmX5M9A/1000024867.jpg" ,
+        "https://cdn.steemitimages.com/DQmc1LphNvohBCUsroZ9zjRuL3VzaVJfMVN9oN8hDmX5M9A/1000024867.jpg",
         "https://cdn.steemitimages.com/DQmQjKH5D34ym38roHSoCKh7W79GaV3f6Hh3FNAf7zH6x4K/1000024869.jpg",
         "https://cdn.steemitimages.com/DQmPNweKd69d1esmMV7DDFFkqs1oPYjEP4TMRqx7TKySk4F/1000024870.jpg",
         "https://cdn.steemitimages.com/DQmVphp18Aq5jdTu2VsvaQ8SK22FQrsoHHMvCnivwFn2ECz/1000024872.jpg"
 
     ],
     'eth': [
-        "https://steemitimages.com",
-        "https://steemitimages.com",
-        "https://steemitimages.com",
-        "https://steemitimages.com"
+        "https://cdn.steemitimages.com/DQmNbTtqvFoiDwHvxVsSo3AfDgK6YnAnvnndpB52ei5o4cg/1000024873.jpg", 
+        "https://cdn.steemitimages.com/DQmXZayvTu9PqYiWRX9s6ok2GYHj4ZVJ2ZzaJbeSQG1UZtd/1000024874.jpg", 
+        "https://cdn.steemitimages.com/DQmeBPMY49p98JYbZqrUHahqyvWiZwTmzKLDH3DqRjK2mej/1000024876.jpg", 
+        "https://cdn.steemitimages.com/DQmRagxTVdy3HweodDjUN1Q3qgXUZgvTpdLBpJR7tJ3VfJS/1000024875.jpg" 
     ],
     'bnb': [
         "https://steemitimages.com",
