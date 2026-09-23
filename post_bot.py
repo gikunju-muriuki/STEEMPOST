@@ -21,23 +21,67 @@ time.sleep(random_delay_seconds)
 # ==========================================
 MY_ACCOUNT = "blog.god"  
 TARGET_COMMUNITY = "hive-129948"  
-CUSTOM_TAGS = ["crypto", "bitcoin", "krsuccess"]
+CUSTOM_TAGS = ["crypto", "xrp", "eth", "bnb", "sol", "btc", "krsuccess"]
 
-# Ultra-low RC Asset Image hosted directly on Steemit's server grid
-SIGNATURE_IMAGE_URL = "https://steemitimages.com"
+# 20 Hardcoded ultra-low RC asset images mapped explicitly (4 per coin asset category)
+IMAGE_MATRIX = {
+    'btc': [
+        "https://steemitimages.com",
+        "https://steemitimages.com",
+        "https://steemitimages.com",
+        "https://steemitimages.com"
+    ],
+    'eth': [
+        "https://steemitimages.com",
+        "https://steemitimages.com",
+        "https://steemitimages.com",
+        "https://steemitimages.com"
+    ],
+    'bnb': [
+        "https://steemitimages.com",
+        "https://steemitimages.com",
+        "https://steemitimages.com",
+        "https://steemitimages.com"
+    ],
+    'xrp': [
+        "https://steemitimages.com",
+        "https://steemitimages.com",
+        "https://steemitimages.com",
+        "https://steemitimages.com"
+    ],
+    'sol': [
+        "https://steemitimages.com",
+        "https://steemitimages.com",
+        "https://steemitimages.com",
+        "https://steemitimages.com"
+    ]
+}
 
 # ==========================================
-# 2. KEY & ENDPOINT MANAGEMENT
+# 2. KEY, ENDPOINT & ACCOUNT HEALTH SAFARDS
 # ==========================================
 MY_PRIVATE_POSTING_KEY = os.getenv("STEEM_POSTING_KEY")
-# Validated standard public node backup path (or swap in your verified worker sub-slug)
-PROXY_URL = "https://steem-proxy.gikunju.workers.dev"  
+PROXY_URL = "https://steemit.com"  
 
 if not MY_PRIVATE_POSTING_KEY:
     print("Error: STEEM_POSTING_KEY secret is missing!")
     exit(1)
 
-# Unified standard data dictionary structure
+# Initialize standard client connection node early for verification
+stm_check = Steem(node=[PROXY_URL], keys=[MY_PRIVATE_POSTING_KEY])
+from beem.account import Account
+account_info = Account(MY_ACCOUNT, blockchain_instance=stm_check)
+
+# Live Resource Credits Bandwidth Guard
+rc_manabar = account_info.get_rc_manabar()
+current_rc = (rc_manabar['current_mana'] / rc_manabar['max_mana']) * 100
+print(f"Account @{MY_ACCOUNT} Live Resource Credits check: {current_rc:.2f}%")
+
+if current_rc < 75.0:
+    print(f"⚠️ Safety Halt: Resource Credits dropped below threshold ({current_rc:.2f}%). Execution skipped.")
+    exit(0)
+
+# Unified standard structured ledger map dictionary
 market_data = {
     'btc': {'name': 'Bitcoin', 'price': 0.0, 'change': 0.0},
     'eth': {'name': 'Ethereum', 'price': 0.0, 'change': 0.0},
@@ -45,6 +89,7 @@ market_data = {
     'xrp': {'name': 'XRP', 'price': 0.0, 'change': 0.0},
     'sol': {'name': 'Solana', 'price': 0.0, 'change': 0.0}
 }
+
 
 # ==========================================
 # 3. CASCADING API DATA EXTRACTION LAYER
@@ -132,8 +177,16 @@ if not data_acquired:
 top_performer = max(market_data.values(), key=lambda x: x['change'])
 
 # ==========================================
-# 4. STRUCTURE & LOW-RC TEXT COMPILATION
+# 4. STRUCTURE, SELECTION & LOW-RC TEXT COMPILATION
 # ==========================================
+# Find the highest performer out of your active database loop dictionary keys
+top_coin_key = max(market_data.keys(), key=lambda k: market_data[k]['change'])
+top_performer = market_data[top_coin_key]
+
+# Pick a completely random target image out of the top performer's 4 dedicated URLs
+selected_display_image = random.choice(IMAGE_MATRIX[top_coin_key])
+print(f"📊 Top Performer: {top_performer['name']} ({top_coin_key.upper()}) at {top_performer['change']:.2f}%. Selected image link variant.")
+
 now_eat = datetime.datetime.utcnow() + datetime.timedelta(hours=3) # UTC to EAT
 
 def get_ordinal_suffix(day):
@@ -161,11 +214,12 @@ body_lines = [
     format_row('bnb'),
     format_row('xrp'),
     format_row('sol'),
-    f"\n🚀 **Top Asset Performer Today:** {top_performer['name']} ({top_performer['name']})\n",
-    f"![Market Overview]({SIGNATURE_IMAGE_URL})"
+    f"\n🚀 **Top Asset Performer Today:** {top_performer['name']} ({top_coin_key.upper()})\n",
+    f"![Market Performance Header Area]({selected_display_image})"
 ]
 post_body = "\n".join(body_lines)
 post_permlink = f"crypto-pulse-report-{now_eat.strftime('%Y%m%d')}"
+
 
 # ==========================================
 # 5. BLOCKCHAIN TRANSMISSION HANDSHAKE
