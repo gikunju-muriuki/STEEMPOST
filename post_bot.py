@@ -1,7 +1,18 @@
 import os
 import datetime
+import time 
+import random 
 from beem import Steem
 from beem.comment import Comment
+
+# =========================================================================
+# GITHUB ACTIONS RUNTIME DELAY BUFFER
+# =========================================================================
+random_delay_seconds = random.randint(60, 1500)
+print(f"Cloudflare handshake cleared. Shifting execution delay to GitHub Actions context...")
+print(f"Jitter activated: Sleeping for {random_delay_seconds / 60:.1f} minutes before posting...")
+time.sleep(random_delay_seconds)
+# =========================================================================
 
 # ==========================================
 # 1. CONFIGURATION VARIABLES
