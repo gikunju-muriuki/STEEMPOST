@@ -206,10 +206,26 @@ def format_row(key):
 
 # A pool of unique human-written title prefixes to break structural repetitions
 title_variations = [
-    "Crypto Pulse Market Overview",
-    "Daily Crypto Market Tracker",
-    "Digital Asset Pulse And Trends Ledger",
-    "Crypto Market Intelligence Update"
+    "The Crypto Market is Crazy Today!",
+    "What's Happening On The Crypto World?",
+    "BTC, XRP, ETH, BNB And SOLANA Are Moving!",
+    "Crypto Market Prices Update",
+    "Is a Crypto Breakout Happening Right Now?",
+    "The Complete Daily Crypto Asset Report",
+    "Where is the Crypto Market Heading Today?",
+    "A Quick Look at Today's Crypto Movements",
+    "Crypto Prices Are Shifting Fast Today!",
+    "Your Essential Daily Crypto Market Ingest",
+    "Major Volatility Hitting Top Crypto Coins!",
+    "Checking In On The Crypto World Today",
+    "Are the Top Cryptos Gaining Momentum?",
+    "Unpacking Today's Crypto Market Action",
+    "The Big 5 Cryptos Are Shaking Up the Market!",
+    "A Quick Breakdown of Today's Crypto Prices",
+    "An Interesting Day in the Crypto Space!",
+    "Tracking Today's Top Cryptocurrencies",
+    "The Latest Shifts in the Crypto Market",
+    "Where the Top 5 Crypto Coins Stand Today"
 ]
 selected_prefix = random.choice(title_variations)
 post_title = f"{selected_prefix} — {formatted_date}"
