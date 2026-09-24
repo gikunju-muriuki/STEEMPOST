@@ -10,7 +10,7 @@ from beem.comment import Comment
 # =========================================================================
 # GITHUB ACTIONS RUNTIME DELAY BUFFER
 # =========================================================================
-random_delay_seconds = random.randint(0, 0)
+random_delay_seconds = random.randint(60, 900)
 print(f"Cloudflare handshake cleared. Shifting execution delay to GitHub Actions context...")
 print(f"Jitter activated: Sleeping for {random_delay_seconds / 60:.1f} minutes before posting...")
 time.sleep(random_delay_seconds)
@@ -201,7 +201,7 @@ formatted_date = f"{day}{suffix} {now_eat.strftime('%A %B %Y')}"
 
 def format_row(key):
     coin = market_data[key]
-    emoji = "🟢 +" if coin['change'] >= 0 else "🔴 "
+    emoji = "🔺 +" if coin['change'] >= 0 else "🔻"
     price_str = f"${coin['price']:,}" if coin['price'] >= 1 else f"${coin['price']:.4f}"
     return f"* 🪙 **{coin['name']} ({key.upper()}):** {price_str} | {emoji}{coin['change']:.2f}%"
 
@@ -249,13 +249,13 @@ print(f"🔗 Matching Permlink Slug compiled: '{post_permlink}'")
 # Compile the final Markdown text array payload
 body_lines = [
     f"### 📈 {selected_prefix} — {formatted_date}\n",
-    "Daily analytical tracking data for top-tier cryptocurrency assets compiled seamlessly using lightweight text parameters:\n",
+    "Latest Prices:\n",
     format_row('btc'),
     format_row('eth'),
     format_row('bnb'),
     format_row('xrp'),
     format_row('sol'),
-    f"\n🚀 **Top Asset Performer Today:** {top_performer['name']} ({top_coin_key.upper()})\n",
+    f"\n🚀 **Top Coin Today:** {top_performer['name']} ({top_coin_key.upper()})\n",
     f"![Market Performance Header Area]({selected_display_image})"
 ]
 post_body = "\n".join(body_lines)
