@@ -62,7 +62,7 @@ IMAGE_MATRIX = {
 # 2. KEY, ENDPOINT & ACCOUNT HEALTH SAFARDS
 # ==========================================
 MY_PRIVATE_POSTING_KEY = os.getenv("STEEM_POSTING_KEY")
-PROXY_URL = "https://steemit.com"  
+PROXY_URL = "https://steem-proxy.gikunju.workers.dev"  
 
 if not MY_PRIVATE_POSTING_KEY:
     print("Error: STEEM_POSTING_KEY secret is missing!")
