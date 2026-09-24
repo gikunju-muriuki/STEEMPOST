@@ -202,7 +202,8 @@ formatted_date = f"{day}{suffix} {now_eat.strftime('%A %B %Y')}"
 def format_row(key):
     coin = market_data[key]
     emoji = "🔺 +" if coin['change'] >= 0 else "🔻"
-    price_str = f"${coin['price']:,}" if coin['price'] >= 1 else f"${coin['price']:.4f}"
+    # Added :.2f to format numbers >= 1 with exactly 2 decimal places
+    price_str = f"${coin['price']:,.2f}" if coin['price'] >= 1 else f"${coin['price']:.4f}"
     return f"* 🪙 **{coin['name']} ({key.upper()}):** {price_str} | {emoji}{coin['change']:.2f}%"
 
 # A pool of unique human-written title prefixes to break structural repetitions
