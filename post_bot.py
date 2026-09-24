@@ -10,7 +10,7 @@ from beem.comment import Comment
 # =========================================================================
 # GITHUB ACTIONS RUNTIME DELAY BUFFER
 # =========================================================================
-random_delay_seconds = random.randint(60, 1500)
+random_delay_seconds = random.randint(0, 0)
 print(f"Cloudflare handshake cleared. Shifting execution delay to GitHub Actions context...")
 print(f"Jitter activated: Sleeping for {random_delay_seconds / 60:.1f} minutes before posting...")
 time.sleep(random_delay_seconds)
