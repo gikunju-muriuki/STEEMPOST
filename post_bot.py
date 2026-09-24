@@ -186,7 +186,7 @@ top_performer = market_data[top_coin_key]
 
 # Pick a completely random target image out of the top performer's 4 dedicated URLs
 selected_display_image = random.choice(IMAGE_MATRIX[top_coin_key])
-print(f"📊 Top Performer: {top_performer['name']} ({top_coin_key.upper()}) at {top_performer['change']:.2f}%. Selected image link variant.")
+print(f"🥇 Top Performer: {top_performer['name']} ({top_coin_key.upper()}) at {top_performer['change']:.2f}%. Selected image link variant.")
 
 now_eat = datetime.datetime.utcnow() + datetime.timedelta(hours=3) # UTC to EAT
 
@@ -244,20 +244,20 @@ slug_str = "-".join("".join(clean_chars).split())
 # 4. Combine the dynamic prefix slug with the current date to guarantee uniqueness
 post_permlink = f"{slug_str}-{now_eat.strftime('%Y%m%d')}"
 
-print(f"🔗 Dynamic Title Generated: '{post_title}'")
-print(f"🔗 Matching Permlink Slug compiled: '{post_permlink}'")
+print(f"✅ Dynamic Title Generated: '{post_title}'")
+print(f"✅ Matching Permlink Slug compiled: '{post_permlink}'")
 
 # Compile the final Markdown text array payload
 body_lines = [
-    f"### 📈 {selected_prefix} — {formatted_date}\n",
+    f"### {formatted_date}\n",
     "Latest Prices:\n",
     format_row('btc'),
     format_row('eth'),
     format_row('bnb'),
     format_row('xrp'),
     format_row('sol'),
-    f"\n🚀 **Top Coin Today:** {top_performer['name']} ({top_coin_key.upper()})\n",
-    f"![Market Performance Header Area]({selected_display_image})"
+    f"\n🔺**Top Coin Today:** {top_performer} ({top_coin_key.upper()})\n",
+    f"![{selected_prefix}]({selected_display_image})"
 ]
 post_body = "\n".join(body_lines)
 
@@ -267,7 +267,7 @@ post_body = "\n".join(body_lines)
 try:
     print(f"Connecting to Steem node: {PROXY_URL}")
     stm = Steem(node=[PROXY_URL], keys=[MY_PRIVATE_POSTING_KEY])
-    print(f"Broadcasting dynamic market data overview to community {TARGET_COMMUNITY}.")
+    print(f"Posting on {TARGET_COMMUNITY}.")
     
     stm.post(
         title=post_title,
@@ -278,7 +278,7 @@ try:
         parent_author="",
         parent_permlink=TARGET_COMMUNITY
     )
-    print(f"Success! Crypto Market Report has been successfully published to {TARGET_COMMUNITY}.")
+    print(f"✅ The Report has been Published on {TARGET_COMMUNITY} posts feed.")
 except Exception as e:
     print(f"CRITICAL ERROR: Broadcast routing failed: {e}")
     exit(1)
