@@ -102,15 +102,28 @@ if not data_acquired:
     print("Primary Pipeline: Fetching live data from CoinGecko Public API...")
     try:
         # Fully qualified API endpoint mapping your target 5 assets
-        gecko_url = "https://api.coingecko.com/api/v3"
+        gecko_url = (
+             "https://api.coingecko.com/api/v3/simple/price"
+             "?ids=bitcoin,ethereum,binancecoin,ripple,solana"
+             "&vs_currencies=usd"
+             "&include_24hr_change=true"
+        )
         req = urllib.request.Request(gecko_url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
         with urllib.request.urlopen(req, timeout=10) as response:
             raw_json = json.loads(response.read().decode())
-            
-            # Map parameters safely
-            mapping = {'bitcoin': 'btc', 'ethereum': 'eth', 'binancecoin': 'bnb', 'ripple': 'xrp', 'solana': 'sol'}
-            for item in raw_json:
-                sym = mapping.get(item['id'])
+
+            mapping = {
+               "bitcoin": "btc",
+               "ethereum": "eth",
+               "binancecoin": "bnb",
+               "ripple": "xrp",
+               "solana": "sol",
+            }
+
+            for coin_id, sym in mapping.items():
+                coin = raw_json.get(coin_id, {})
+                market_data[sym]["price"] = float(coin.get("usd", 0))
+                market_data[sym]["change"] = float(coin.get("usd_24h_change") or 0)
                 if sym:
                     market_data[sym]['price'] = float(item['current_price'])
                     market_data[sym]['change'] = float(item['price_change_percentage_24h'] or 0.0)
@@ -127,7 +140,11 @@ if not data_acquired:
     print("Secondary Pipeline: Fetching live data from CryptoCompare API...")
     try:
         # Validated pricing API url string query parameters
-        cc_url = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC&tsyms=USD"
+        cc_url = (
+            "https://min-api.cryptocompare.com/data/pricemultifull"
+            "?fsyms=BTC,ETH,BNB,XRP,SOL"
+            "&tsyms=USD"
+        )
         req = urllib.request.Request(cc_url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, timeout=10) as response:
             raw_json = json.loads(response.read().decode())
