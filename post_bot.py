@@ -230,7 +230,7 @@ title_variations = [
     "Where the Top 5 Crypto Coins Stand Today"
 ]
 selected_prefix = random.choice(title_variations)
-post_title = f"{selected_prefix} — {formatted_date}"
+post_title = f"{selected_prefix}"
 
 # ==========================================
 # 5. DYNAMIC TITLE-BASED PERMLINK SLUG LOGIC
@@ -256,7 +256,7 @@ body_lines = [
     format_row('bnb'),
     format_row('xrp'),
     format_row('sol'),
-    f"\n🔺**Top Coin Today:** {top_performer} ({top_coin_key.upper()})\n",
+    f"\n🔺**Top Coin Today:** {top_coin_key.upper()}\n",
     f"![{selected_prefix}]({selected_display_image})"
 ]
 post_body = "\n".join(body_lines)
