@@ -6,6 +6,7 @@ import json
 import urllib.request
 from beem import Steem
 from beem.comment import Comment
+import websocket
 
 # =========================================================================
 # GITHUB ACTIONS RUNTIME DELAY BUFFER
@@ -144,31 +145,58 @@ if not data_acquired:
             "Forwarding request to Backup Pipeline..."
         )
 
-# --- SOURCE 2: CRYPTOCOMPARE PUBLIC ENDPOINT ---
+# --- SOURCE 2: BINANCE PUBLIC WEBSOCKET ---
 if not data_acquired:
-    print("Secondary Pipeline: Fetching live data from CryptoCompare API...")
+    print("Secondary Pipeline: Fetching live data from Binance WebSocket...")
+
     try:
-        # Validated pricing API url string query parameters
-        cc_url = (
-            "https://min-api.cryptocompare.com/data/pricemultifull"
-            "?fsyms=BTC,ETH,BNB,XRP,SOL"
-            "&tsyms=USD"
+        binance_symbols = {
+            "BTCUSDT": "btc",
+            "ETHUSDT": "eth",
+            "BNBUSDT": "bnb",
+            "XRPUSDT": "xrp",
+            "SOLUSDT": "sol",
+        }
+
+        streams = "/".join(
+            f"{symbol.lower()}@ticker"
+            for symbol in binance_symbols
         )
-        req = urllib.request.Request(cc_url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=10) as response:
-            raw_json = json.loads(response.read().decode())
-            raw_data = raw_json.get("RAW", {})
-            
-            for sym in ['BTC', 'ETH', 'BNB', 'XRP', 'SOL']:
-                low_sym = sym.lower()
-                market_data[low_sym]['price'] = float(raw_data[sym]['USD']['PRICE'])
-                market_data[low_sym]['change'] = float(raw_data[sym]['USD']['CHANGEPCT24HOUR'])
-            
-            if market_data['btc']['price'] > 0:
-                data_acquired = True
-                print("CryptoCompare ingestion complete.")
+
+        binance_url = (
+            "wss://stream.binance.com:9443/stream"
+            f"?streams={streams}"
+        )
+
+        prices_received = set()
+        ws = websocket.create_connection(binance_url, timeout=10)
+
+        try:
+            while prices_received != set(binance_symbols):
+                message = json.loads(ws.recv())
+                ticker = message.get("data", {})
+
+                symbol = ticker.get("s")
+                if symbol not in binance_symbols:
+                    continue
+
+                market_key = binance_symbols[symbol]
+                market_data[market_key]["price"] = float(ticker["c"])
+                market_data[market_key]["change"] = float(ticker["P"])
+                prices_received.add(symbol)
+
+        finally:
+            ws.close()
+
+        if len(prices_received) == len(binance_symbols):
+            data_acquired = True
+            print("Binance WebSocket ingestion complete.")
+
     except Exception as e:
-        print(f"⚠️ Secondary Pipeline Blocked ({e}). Forwarding to Tertiary Tier...")
+        print(
+            f"⚠️ Secondary Pipeline Blocked ({e}). "
+            "Forwarding to Tertiary Tier..."
+        )
 
 # --- SOURCE 3: COINPAPRIKA PUBLIC KEYLESS ENDPOINT ---
 if not data_acquired:
