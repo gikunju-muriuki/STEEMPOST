@@ -102,40 +102,47 @@ if not data_acquired:
     print("Primary Pipeline: Fetching live data from CoinGecko Public API...")
     try:
         # Fully qualified API endpoint mapping your target 5 assets
-gecko_url = (
-     "https://api.coingecko.com/api/v3/simple/price"
-     "?ids=bitcoin,ethereum,binancecoin,ripple,solana"
-     "&vs_currencies=usd"
-     "&include_24hr_change=true"
-)
-req = urllib.request.Request(
-    gecko_url,
-    headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-)
-
-with urllib.request.urlopen(req, timeout=10) as response:
-    raw_json = json.loads(response.read().decode())
-
-    mapping = {
-       "bitcoin": "btc",
-       "ethereum": "eth",
-       "binancecoin": "bnb",
-       "ripple": "xrp",
-       "solana": "sol",
-    }
-
-    for coin_id, sym in mapping.items():
-        coin = raw_json.get(coin_id, {})
-        market_data[sym]["price"] = float(coin.get("usd", 0))
-        market_data[sym]["change"] = float(
-            coin.get("usd_24h_change") or 0
+        gecko_url = (
+            "https://api.coingecko.com/api/v3/simple/price"
+            "?ids=bitcoin,ethereum,binancecoin,ripple,solana"
+            "&vs_currencies=usd"
+            "&include_24hr_change=true"
         )
 
-    if market_data["btc"]["price"] > 0:
-        data_acquired = True
-        print("CoinGecko ingestion complete.")
+        req = urllib.request.Request(
+            gecko_url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+            }
+        )
+
+        with urllib.request.urlopen(req, timeout=10) as response:
+            raw_json = json.loads(response.read().decode())
+
+        mapping = {
+            "bitcoin": "btc",
+            "ethereum": "eth",
+            "binancecoin": "bnb",
+            "ripple": "xrp",
+            "solana": "sol",
+        }
+
+        for coin_id, sym in mapping.items():
+            coin = raw_json.get(coin_id, {})
+            market_data[sym]["price"] = float(coin.get("usd", 0))
+            market_data[sym]["change"] = float(
+                coin.get("usd_24h_change") or 0
+            )
+
+        if market_data["btc"]["price"] > 0:
+            data_acquired = True
+            print("CoinGecko ingestion complete.")
+
     except Exception as e:
-        print(f"⚠️ Primary Pipeline Blocked ({e}). Forwarding request to Backup Pipeline...")
+        print(
+            f"⚠️ Primary Pipeline Blocked ({e}). "
+            "Forwarding request to Backup Pipeline..."
+        )
 
 # --- SOURCE 2: CRYPTOCOMPARE PUBLIC ENDPOINT ---
 if not data_acquired:
