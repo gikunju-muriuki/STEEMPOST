@@ -217,7 +217,7 @@ if not data_acquired:
                     market_data[sym]['price'] = float(item['quotes']['USD']['price'])
                     market_data[sym]['change'] = float(item['quotes']['USD']['percent_change_24h'])
             
-            if market_data['btc']['price'] > 0:
+            if all(coin["price"] > 0 for coin in market_data.values()):
                 data_acquired = True
                 print("CoinPaprika ingestion complete.")
     except Exception as e:
