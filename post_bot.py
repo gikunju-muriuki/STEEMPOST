@@ -135,7 +135,7 @@ if not data_acquired:
                 coin.get("usd_24h_change") or 0
             )
 
-        if market_data["btc"]["price"] > 0:
+        if all(coin["price"] > 0 for coin in market_data.values()):
             data_acquired = True
             print("CoinGecko ingestion complete.")
 
@@ -228,8 +228,6 @@ if not data_acquired:
     print("Safeguard Halt: Live market data unreachable. Terminating deployment loop to prevent posting old data.")
     exit(0) # Halts context cleanly without displaying system error codes on GitHub
 
-# Find the highest performer out of your active database loop
-top_performer = max(market_data.values(), key=lambda x: x['change'])
 
 # ==========================================
 # 4. STRUCTURE, SELECTION & LOW-RC TEXT COMPILATION
