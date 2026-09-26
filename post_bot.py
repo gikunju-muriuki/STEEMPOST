@@ -22,7 +22,7 @@ time.sleep(random_delay_seconds)
 # ==========================================
 MY_ACCOUNT = "blog.god"  
 TARGET_COMMUNITY = "hive-129948"  
-CUSTOM_TAGS = ["crypto", "xrp", "eth", "bnb", "sol", "btc", "krsuccess"]
+CUSTOM_TAGS = ["crypto", "xrp", "eth", "bnb", "game", "btc", "drugwars-fight"]
 
 # 20 Hardcoded ultra-low RC asset images mapped explicitly (4 per coin asset category)
 IMAGE_MATRIX = {
@@ -308,7 +308,7 @@ body_lines = [
     format_row('bnb'),
     format_row('xrp'),
     format_row('sol'),
-    f"\n🔺**Top Coin Today:** {top_coin_key.upper()}\n",
+    f"\n🔺**Top Coin in The Game Today:** {top_coin_key.upper()}\n",
     f"![{selected_prefix}]({selected_display_image})"
 ]
 post_body = "\n".join(body_lines)
