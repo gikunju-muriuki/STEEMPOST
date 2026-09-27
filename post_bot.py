@@ -27,35 +27,19 @@ CUSTOM_TAGS = ["crypto", "price", "hodl", "steemexclusive"]
 # 20 Hardcoded ultra-low RC asset images mapped explicitly (4 per coin asset category)
 IMAGE_MATRIX = {
     'btc': [
-        "https://cdn.steemitimages.com/DQmc1LphNvohBCUsroZ9zjRuL3VzaVJfMVN9oN8hDmX5M9A/1000024867.jpg",
-        "https://cdn.steemitimages.com/DQmQjKH5D34ym38roHSoCKh7W79GaV3f6Hh3FNAf7zH6x4K/1000024869.jpg",
-        "https://cdn.steemitimages.com/DQmPNweKd69d1esmMV7DDFFkqs1oPYjEP4TMRqx7TKySk4F/1000024870.jpg",
-        "https://cdn.steemitimages.com/DQmVphp18Aq5jdTu2VsvaQ8SK22FQrsoHHMvCnivwFn2ECz/1000024872.jpg"
-
+        "https://cdn.steemitimages.com/DQmTRo2CqjYcBY4R3LHpvwC3Z4rdMeZoQFFyMN6bKWwmUPF/1000026272.png"
     ],
     'eth': [
-        "https://cdn.steemitimages.com/DQmNbTtqvFoiDwHvxVsSo3AfDgK6YnAnvnndpB52ei5o4cg/1000024873.jpg", 
-        "https://cdn.steemitimages.com/DQmXZayvTu9PqYiWRX9s6ok2GYHj4ZVJ2ZzaJbeSQG1UZtd/1000024874.jpg", 
-        "https://cdn.steemitimages.com/DQmeBPMY49p98JYbZqrUHahqyvWiZwTmzKLDH3DqRjK2mej/1000024876.jpg", 
-        "https://cdn.steemitimages.com/DQmRagxTVdy3HweodDjUN1Q3qgXUZgvTpdLBpJR7tJ3VfJS/1000024875.jpg" 
+        "https://cdn.steemitimages.com/DQmRy52sp4xzmbQPsQD3qiMNnosE8N93XFj9TzNkq8sfSWw/1000026271.png"
     ],
     'bnb': [
-        "https://cdn.steemitimages.com/DQmSVx5EisX8kQfv516tTnsuw8da9PWLYSgvMQxpNLZkCFc/1000024880.jpg", 
-        "https://cdn.steemitimages.com/DQmRrPFPJ1gP3SLEv5deYRVtJzHr31iBVXiCFvsBPVnqtHZ/1000024879.jpg", 
-        "https://cdn.steemitimages.com/DQmPSX1xN4vEQerdyD147mmhCvxX4KpcU4brJXeuhN978qa/1000024878.jpg", 
-        "https://cdn.steemitimages.com/DQmX4F4oZtAYv8TXvoripjNxzw1YWn5BnGwb3DJCJHpFmRC/1000024877.jpg" 
+        "https://cdn.steemitimages.com/DQmPioV1ZT5pkLyXEAeRA9BEsquZY1FXgtYBY2LVxbfyTkx/1000026270.png"
     ],
     'xrp': [
-        "https://cdn.steemitimages.com/DQmeLCBSXQtxgudkdAarnH9u2U9qAQsJYsVZ3RaeLuyyTZ1/1000024886.jpg", 
-        "https://cdn.steemitimages.com/DQmdc4oUuB4gHpeL2DoD5xZZc7EiEFeGtsUYhRH4EoSiQEh/1000024885.jpg", 
-        "https://cdn.steemitimages.com/DQmXpKpPXpHWWM5UyVo4adFboRwFLXCNGQhSKyLciUxzTny/1000024884.jpg", 
-        "https://cdn.steemitimages.com/DQmTxJR9qrXqhGWVQZz8XHab5gn6RaTHm7VFkHvkDmtpM8H/1000024883.jpg"
+        "https://cdn.steemitimages.com/DQmXdQ6R5awqr61Q88s4QX7fCo6PA3FVMZC7hcLMuU86K3M/1000026268.png"
     ],
     'sol': [
-        "https://cdn.steemitimages.com/DQmXE8Ke5EsaayVFJwHTrqYYTGbHNe9gkJMPDWn4qxBJQyD/1000024887.jpg",
-        "https://cdn.steemitimages.com/DQmZHGWT8Y3u4GsKtvQtN65cSNGTXtVxJiJGNXLduaokxkn/1000024888.jpg",
-        "https://cdn.steemitimages.com/DQmWGdsU9wF3arTmn4Fz9A4pkU3xSDsGFoVpHgjDURW8xuf/1000024889.jpg",
-        "https://cdn.steemitimages.com/DQmbsLSbAETZcwdoKG2t6hNPK9fZShorsMkfcGe5xrhtpfC/1000024890.jpg"
+        "https://cdn.steemitimages.com/DQmThwcs2LNGnv3gxU94otXYU4Lh3h96kib5GWBcay1623j/1000026269.png"
     ]
 }
 
@@ -308,7 +292,7 @@ body_lines = [
     format_row('bnb'),
     format_row('xrp'),
     format_row('sol'),
-    f"\n🔺**Top Coin in The Game Today:** {top_coin_key.upper()}\n",
+    f"\n🔺**Top Coin Today:** {top_coin_key.upper()}\n",
     f"![{selected_prefix}]({selected_display_image})"
 ]
 post_body = "\n".join(body_lines)
