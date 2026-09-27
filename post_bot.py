@@ -22,7 +22,7 @@ time.sleep(random_delay_seconds)
 # ==========================================
 MY_ACCOUNT = "blog.god"  
 TARGET_COMMUNITY = "hive-129948"  
-CUSTOM_TAGS = ["crypto", "upvote", "steemgames", "steemace", "game", "upfundme", "drugwars-fight"]
+CUSTOM_TAGS = ["crypto", "price", "hodl", "steemexclusive"]
 
 # 20 Hardcoded ultra-low RC asset images mapped explicitly (4 per coin asset category)
 IMAGE_MATRIX = {
