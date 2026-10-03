@@ -353,7 +353,7 @@ print(f"✅ Matching Permlink Slug compiled: '{post_permlink}'")
 
 # Compile the final Markdown text array payload
 body_lines = [
-    f"\n**{formatted_date}** 🕘 *{timestamp_utc}*\n",
+    f"\n**{formatted_date}**  🕘 *{timestamp_utc}*\n",
     "Latest Prices:\n",
     format_row('btc'),
     format_row('eth'),
