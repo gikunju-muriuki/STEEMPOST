@@ -360,7 +360,7 @@ body_lines = [
     format_row('bnb'),
     format_row('xrp'),
     format_row('sol'),
-    f"\n🔺**Top Coin Today:** {top_coin_key.upper()}\n",
+    f"\n🔺**Top Gainer:** {top_coin_key.upper()}\n",
     f"![{selected_prefix}]({selected_display_image})",
     f"*AI generated image*\n"
 ]
