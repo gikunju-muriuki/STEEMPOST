@@ -27,19 +27,19 @@ CUSTOM_TAGS = ["cryptocurrency", "trading", "blockchain", "report"]
 # Ultra-low RC asset images mapped explicitly (Per coin asset category)
 IMAGE_MATRIX = {
     'btc': [
-        "https://cdn.steemitimages.com/DQmTRo2CqjYcBY4R3LHpvwC3Z4rdMeZoQFFyMN6bKWwmUPF/1000026272.png"
+        "https://cdn.steemitimages.com/DQmZi457jBge1mfGXDGyj9bhCxeAXcEfaLgwnrtKcVHdmVs/1000027726.jpg"
     ],
     'eth': [
-        "https://cdn.steemitimages.com/DQmRy52sp4xzmbQPsQD3qiMNnosE8N93XFj9TzNkq8sfSWw/1000026271.png"
+        "https://cdn.steemitimages.com/DQmfUQ1SwxLTQQdizA4REugtndjMDp11kqQ7y5jjEVRmjCq/1000027729.jpg"
     ],
     'bnb': [
-        "https://cdn.steemitimages.com/DQmPioV1ZT5pkLyXEAeRA9BEsquZY1FXgtYBY2LVxbfyTkx/1000026270.png"
+        "https://cdn.steemitimages.com/DQmPgAypoxC2jmDyy4zw9e5UzeUzAsxbZbucSstZfP3hrMv/1000027733.jpg"
     ],
     'xrp': [
-        "https://cdn.steemitimages.com/DQmXdQ6R5awqr61Q88s4QX7fCo6PA3FVMZC7hcLMuU86K3M/1000026268.png"
+        "https://cdn.steemitimages.com/DQmSHYqqigFCfojABxSwVxx95og78r5Zf5vBcRov7UjNm3X/1000027735.jpg"
     ],
     'sol': [
-        "https://cdn.steemitimages.com/DQmThwcs2LNGnv3gxU94otXYU4Lh3h96kib5GWBcay1623j/1000026269.png"
+        "https://cdn.steemitimages.com/DQmRz6hdSMyfyk4RKH5xruLN4vVkxgypACBF5Nfso6whM38/1000027731.jpg"
     ]
 }
 
