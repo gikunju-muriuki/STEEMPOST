@@ -234,6 +234,7 @@ def get_ordinal_suffix(day):
 day = now_eat.day
 suffix = get_ordinal_suffix(day)
 formatted_date = f"{day}{suffix} {now_eat.strftime('%A %B %Y')}"
+timestamp_utc = now_eat.strftime('%H:%M EAT')
 
 def format_row(key):
     coin = market_data[key]
@@ -352,7 +353,7 @@ print(f"✅ Matching Permlink Slug compiled: '{post_permlink}'")
 
 # Compile the final Markdown text array payload
 body_lines = [
-    f"### {formatted_date}\n",
+    f"\n**{formatted_date}** 🕘 *{timestamp_utc}*\n",
     "Latest Prices:\n",
     format_row('btc'),
     format_row('eth'),
@@ -360,7 +361,8 @@ body_lines = [
     format_row('xrp'),
     format_row('sol'),
     f"\n🔺**Top Coin Today:** {top_coin_key.upper()}\n",
-    f"![{selected_prefix}]({selected_display_image})"
+    f"![{selected_prefix}]({selected_display_image})",
+    f"*AI generated image*\n"
 ]
 post_body = "\n".join(body_lines)
 
