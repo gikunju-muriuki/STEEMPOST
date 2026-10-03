@@ -22,9 +22,9 @@ time.sleep(random_delay_seconds)
 # ==========================================
 MY_ACCOUNT = "blog.god"  
 TARGET_COMMUNITY = "hive-129948"  
-CUSTOM_TAGS = ["crypto", "price", "hodl", "steemexclusive"]
+CUSTOM_TAGS = ["cryptocurrency", "trading", "blockchain", "report"]
 
-# 20 Hardcoded ultra-low RC asset images mapped explicitly (4 per coin asset category)
+# Ultra-low RC asset images mapped explicitly (Per coin asset category)
 IMAGE_MATRIX = {
     'btc': [
         "https://cdn.steemitimages.com/DQmTRo2CqjYcBY4R3LHpvwC3Z4rdMeZoQFFyMN6bKWwmUPF/1000026272.png"
