@@ -22,7 +22,7 @@ time.sleep(random_delay_seconds)
 # ==========================================
 MY_ACCOUNT = "blog.god"  
 TARGET_COMMUNITY = "hive-129948"  
-CUSTOM_TAGS = ["cryptocurrency", "trading", "blockchain", "report"]
+CUSTOM_TAGS = ["cryptocurrency", "crypto", "blog", "trading", "blockchain", "report"]
 
 # Ultra-low RC asset images mapped explicitly (Per coin asset category)
 IMAGE_MATRIX = {
