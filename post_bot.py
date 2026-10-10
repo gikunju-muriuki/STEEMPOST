@@ -405,7 +405,6 @@ clean_chars = [char if char.isalnum() or char.isspace() else "" for char in raw_
 slug_str = "-".join("".join(clean_chars).split())
 # 4. Combine the dynamic prefix slug with the current date to guarantee uniqueness
 post_permlink = f"{slug_str}-{now_eat.strftime('%Y%m%d')}"
-target_crypto_author = scan_latest_crypto_author(stm_check)
 scanned_post_data = scan_latest_crypto_post(stm_check)
 
 
@@ -432,7 +431,7 @@ if scanned_post_data:
     author = scanned_post_data["author"]
     permlink = scanned_post_data["permlink"]
     # Build the official Steemit deep link to the original post
-    steemit_url = f"https://steemit.com@{author}/{permlink}"
+    steemit_url = f"https://steemit.com/@{author}/{permlink}"
     
     # Format the shout-out line with an embedded hyperlink to the post
     shoutout_text = (
