@@ -6,6 +6,7 @@ import json
 import urllib.request
 from beem import Steem
 from beem.comment import Comment
+from beem.discussions import Discussions_by_created
 import websocket
 
 # =========================================================================
@@ -23,23 +24,44 @@ time.sleep(random_delay_seconds)
 MY_ACCOUNT = "blog.god"  
 TARGET_COMMUNITY = "hive-129948"  
 CUSTOM_TAGS = ["cryptocurrency", "crypto", "blog", "trading", "blockchain", "report"]
+CRYPTO_KEYWORDS = ["crypto", "cryptocurrency", "bitcoin", "btc", "ethereum", "eth", "solana", "sol", "xrp", "ripple", "binance", "bnb", "trading", "blockchain"]
 
 # Ultra-low RC asset images mapped explicitly (Per coin asset category)
 IMAGE_MATRIX = {
     'btc': [
-        "https://cdn.steemitimages.com/DQmZi457jBge1mfGXDGyj9bhCxeAXcEfaLgwnrtKcVHdmVs/1000027726.jpg"
+        "https://cdn.steemitimages.com/DQmZi457jBge1mfGXDGyj9bhCxeAXcEfaLgwnrtKcVHdmVs/1000027726.jpg",
+        "https://cdn.steemitimages.com/DQmc1LphNvohBCUsroZ9zjRuL3VzaVJfMVN9oN8hDmX5M9A/1000024867.jpg",
+        "https://cdn.steemitimages.com/DQmQjKH5D34ym38roHSoCKh7W79GaV3f6Hh3FNAf7zH6x4K/1000024869.jpg",
+        "https://cdn.steemitimages.com/DQmPNweKd69d1esmMV7DDFFkqs1oPYjEP4TMRqx7TKySk4F/1000024870.jpg",
+        "https://cdn.steemitimages.com/DQmVphp18Aq5jdTu2VsvaQ8SK22FQrsoHHMvCnivwFn2ECz/1000024872.jpg"
     ],
     'eth': [
-        "https://cdn.steemitimages.com/DQmfUQ1SwxLTQQdizA4REugtndjMDp11kqQ7y5jjEVRmjCq/1000027729.jpg"
+        "https://cdn.steemitimages.com/DQmfUQ1SwxLTQQdizA4REugtndjMDp11kqQ7y5jjEVRmjCq/1000027729.jpg",
+        "https://cdn.steemitimages.com/DQmNbTtqvFoiDwHvxVsSo3AfDgK6YnAnvnndpB52ei5o4cg/1000024873.jpg", 
+        "https://cdn.steemitimages.com/DQmXZayvTu9PqYiWRX9s6ok2GYHj4ZVJ2ZzaJbeSQG1UZtd/1000024874.jpg", 
+        "https://cdn.steemitimages.com/DQmeBPMY49p98JYbZqrUHahqyvWiZwTmzKLDH3DqRjK2mej/1000024876.jpg", 
+        "https://cdn.steemitimages.com/DQmRagxTVdy3HweodDjUN1Q3qgXUZgvTpdLBpJR7tJ3VfJS/1000024875.jpg" 
     ],
     'bnb': [
-        "https://cdn.steemitimages.com/DQmPgAypoxC2jmDyy4zw9e5UzeUzAsxbZbucSstZfP3hrMv/1000027733.jpg"
+        "https://cdn.steemitimages.com/DQmPgAypoxC2jmDyy4zw9e5UzeUzAsxbZbucSstZfP3hrMv/1000027733.jpg",
+        "https://cdn.steemitimages.com/DQmSVx5EisX8kQfv516tTnsuw8da9PWLYSgvMQxpNLZkCFc/1000024880.jpg", 
+        "https://cdn.steemitimages.com/DQmRrPFPJ1gP3SLEv5deYRVtJzHr31iBVXiCFvsBPVnqtHZ/1000024879.jpg", 
+        "https://cdn.steemitimages.com/DQmPSX1xN4vEQerdyD147mmhCvxX4KpcU4brJXeuhN978qa/1000024878.jpg", 
+        "https://cdn.steemitimages.com/DQmX4F4oZtAYv8TXvoripjNxzw1YWn5BnGwb3DJCJHpFmRC/1000024877.jpg" 
     ],
     'xrp': [
-        "https://cdn.steemitimages.com/DQmSHYqqigFCfojABxSwVxx95og78r5Zf5vBcRov7UjNm3X/1000027735.jpg"
+        "https://cdn.steemitimages.com/DQmSHYqqigFCfojABxSwVxx95og78r5Zf5vBcRov7UjNm3X/1000027735.jpg",
+        "https://cdn.steemitimages.com/DQmeLCBSXQtxgudkdAarnH9u2U9qAQsJYsVZ3RaeLuyyTZ1/1000024886.jpg", 
+        "https://cdn.steemitimages.com/DQmdc4oUuB4gHpeL2DoD5xZZc7EiEFeGtsUYhRH4EoSiQEh/1000024885.jpg", 
+        "https://cdn.steemitimages.com/DQmXpKpPXpHWWM5UyVo4adFboRwFLXCNGQhSKyLciUxzTny/1000024884.jpg", 
+        "https://cdn.steemitimages.com/DQmTxJR9qrXqhGWVQZz8XHab5gn6RaTHm7VFkHvkDmtpM8H/1000024883.jpg"
     ],
     'sol': [
-        "https://cdn.steemitimages.com/DQmRz6hdSMyfyk4RKH5xruLN4vVkxgypACBF5Nfso6whM38/1000027731.jpg"
+        "https://cdn.steemitimages.com/DQmRz6hdSMyfyk4RKH5xruLN4vVkxgypACBF5Nfso6whM38/1000027731.jpg",
+        "https://cdn.steemitimages.com/DQmXE8Ke5EsaayVFJwHTrqYYTGbHNe9gkJMPDWn4qxBJQyD/1000024887.jpg",
+        "https://cdn.steemitimages.com/DQmZHGWT8Y3u4GsKtvQtN65cSNGTXtVxJiJGNXLduaokxkn/1000024888.jpg",
+        "https://cdn.steemitimages.com/DQmWGdsU9wF3arTmn4Fz9A4pkU3xSDsGFoVpHgjDURW8xuf/1000024889.jpg",
+        "https://cdn.steemitimages.com/DQmbsLSbAETZcwdoKG2t6hNPK9fZShorsMkfcGe5xrhtpfC/1000024890.jpg"
     ]
 }
 
@@ -212,9 +234,45 @@ if not data_acquired:
     print("Safeguard Halt: Live market data unreachable. Terminating deployment loop to prevent posting old data.")
     exit(0) # Halts context cleanly without displaying system error codes on GitHub
 
+# ==========================================
+# 4. SCAN BLOCKCHAIN FOR CRYPTO POST AUTHOR
+# ==========================================
+def scan_latest_crypto_post(blockchain_instance):
+    """
+    Scans the latest global history feed for the newest post containing 
+    a crypto related hashtag, or crypto words within the title or body.
+    Returns a dict with author and permlink, or None.
+    """
+    print("Scanning blockchain history for the latest crypto-related post...")
+    try:
+        query = {"limit": 50, "tag": ""}
+        discussions = Discussions_by_created(query, blockchain_instance=blockchain_instance)
+        
+        for post in discussions:
+            author = post.get("author")
+            permlink = post.get("permlink")  # Grab the permlink slug
+            title = post.get("title", "").lower()
+            body = post.get("body", "").lower()
+            tags = [t.lower() for t in post.get("tags", [])]
+            
+            # Avoid tagging yourself
+            if author == MY_ACCOUNT:
+                continue
+                
+            # Match condition
+            for keyword in CRYPTO_KEYWORDS:
+                if keyword in tags or keyword in title or keyword in body:
+                    print(f"Found matching crypto post by @{author} (Permlink: {permlink})")
+                    return {"author": author, "permlink": permlink}
+                    
+    except Exception as scan_err:
+        print(f"Warning: Exception encountered during blockchain analysis scan: {scan_err}")
+    
+    return None
+
 
 # ==========================================
-# 4. STRUCTURE, SELECTION & LOW-RC TEXT COMPILATION
+# 5. STRUCTURE, SELECTION & LOW-RC TEXT COMPILATION
 # ==========================================
 # Find the highest performer out of your active database loop dictionary keys
 top_coin_key = max(market_data.keys(), key=lambda k: market_data[k]['change'])
@@ -337,7 +395,7 @@ selected_prefix = random.choice(title_variations)
 post_title = f"{selected_prefix}"
 
 # ==========================================
-# 5. DYNAMIC TITLE-BASED PERMLINK SLUG LOGIC
+# 6. DYNAMIC TITLE-BASED PERMLINK SLUG LOGIC
 # ==========================================
 # 1. Transform the randomly chosen prefix to lowercase
 raw_slug = selected_prefix.lower()
@@ -347,6 +405,10 @@ clean_chars = [char if char.isalnum() or char.isspace() else "" for char in raw_
 slug_str = "-".join("".join(clean_chars).split())
 # 4. Combine the dynamic prefix slug with the current date to guarantee uniqueness
 post_permlink = f"{slug_str}-{now_eat.strftime('%Y%m%d')}"
+target_crypto_author = scan_latest_crypto_author(stm_check)
+scanned_post_data = scan_latest_crypto_post(stm_check)
+
+
 
 print(f"✅ Dynamic Title Generated: '{post_title}'")
 print(f"✅ Matching Permlink Slug compiled: '{post_permlink}'")
@@ -364,10 +426,27 @@ body_lines = [
     f"![{selected_prefix}]({selected_display_image})",
     f"*AI generated image*\n"
 ]
+
+# Only inject the shout-out if a valid post was successfully scanned
+if scanned_post_data:
+    author = scanned_post_data["author"]
+    permlink = scanned_post_data["permlink"]
+    # Build the official Steemit deep link to the original post
+    steemit_url = f"https://steemit.com@{author}/{permlink}"
+    
+    # Format the shout-out line with an embedded hyperlink to the post
+    shoutout_text = (
+        f"A big shout-out to @{author} for keeping up with the crypto space today! "
+        f"Check out their latest update here: **[{permlink}]({steemit_url})**.\n"
+    )
+    
+    # Placed at index 1 to keep it near the top of the post as requested
+    body_lines.insert(1, shoutout_text)
+
 post_body = "\n".join(body_lines)
 
 # ==========================================
-# 5. BLOCKCHAIN TRANSMISSION HANDSHAKE
+# 7. BLOCKCHAIN TRANSMISSION HANDSHAKE
 # ==========================================
 try:
     print(f"Connecting to Steem node: {PROXY_URL}")
