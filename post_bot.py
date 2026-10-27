@@ -452,6 +452,10 @@ body_lines = [
     format_row('sol'),
     f"\n🔺**Top Gainer:** {top_coin_key.upper()}\n",
     f"![{selected_prefix}]({selected_display_image})",
+    "[My Bengali Blog](https://www.steemit.com/trending/hive-129948) & [Discord](https://discord.gg/amarbanglablog)\n",
+    "https://cdn.steemitimages.com/DQmZvVRHsowjHm4n9wHe1VvXceqbaTUYsquTVAUX9GsBQcf/IMG_20220926_174120.png\n",
+    "Vote [bangla.witness](https://steemlogin.com/sign/account-witness-vote?witness=bangla.witness&approve=true) Or Set @rme as your [proxy](https://steemitwallet.com/witnesses)\n",
+    "https://cdn.steemitimages.com/DQmRXkkCEbXLYwhPEYqkaUbwhy4FaqarQVhnzkh1Awp3GRw/witness_proxy_vote.png\n",
     f'<div class="footer">\n  <div class="pull-left">\n    Author: @blog.god\n  </div>\n  <div class="pull-right">\n    <img src="https://cdn.steemitimages.com/DQmeJV5dmDXBLXQHGxdfsDggpQNgBymH7wuuQSZ4pmyACVi/1000029381.png" alt="Footer" />\n  </div>\n</div>\n<div class="pull-left">\n  ©EGM 2016 - 2036\n</div>'
 ]
 
