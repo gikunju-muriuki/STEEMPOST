@@ -4,6 +4,7 @@ import time
 import random 
 import json
 import urllib.request
+from PIL import Image, ImageDraw, ImageFont
 from beem import Steem
 from beem.comment import Comment
 from beem.discussions import Discussions_by_created
@@ -12,7 +13,7 @@ import websocket
 # =========================================================================
 # GITHUB ACTIONS RUNTIME DELAY BUFFER
 # =========================================================================
-random_delay_seconds = random.randint(60, 900)
+random_delay_seconds = random.randint(60, 60)
 print(f"Cloudflare handshake cleared. Shifting execution delay to GitHub Actions context...")
 print(f"Jitter activated: Sleeping for {random_delay_seconds / 60:.1f} minutes before posting...")
 time.sleep(random_delay_seconds)
@@ -22,87 +23,211 @@ time.sleep(random_delay_seconds)
 # 1. CONFIGURATION VARIABLES
 # ==========================================
 MY_ACCOUNT = "blog.god"  
-TARGET_COMMUNITY = "hive-129948"  
-CUSTOM_TAGS = ["steemexclusive", "abb-powerup", "beautyofcreativity", "risefig"]
-CRYPTO_KEYWORDS = ["crypto", "cryptocurrency"]
-
-# Ultra-low RC asset images mapped explicitly (Per coin asset category)
-IMAGE_MATRIX = {
-    'btc': [
-        "https://cdn.steemitimages.com/DQmdpwMbaNCXxsNitesDjWo9HRWFsJq86yTK9seJbofEV7Y/1000029397.jpg",
-        "https://cdn.steemitimages.com/DQmUdLFrXh6nc1aercDqaZ6aLYYyfXMKvuTRAosSCEeMxH5/1000032144.jpg",
-        "https://cdn.steemitimages.com/DQmbwGRdZN8ztqe8Xp8wSTtsg3CfkDE6K4Lp8s7arR2K8EL/1000032146.jpg",
-        "https://cdn.steemitimages.com/DQmVAxgGzRJ3WmnWPF1XGmVnJisVspxq6h6yrrkVtPdTmKp/1000032148.jpg",
-        "https://cdn.steemitimages.com/DQmVaPN343qgu3YBmtvE1ZbPmwpVfiw1E1nuVoKLoAZaeaS/1000029395.jpg",
-        "https://cdn.steemitimages.com/DQmQH3w2pCVW1VuyYqGjbSWUzDDoEbLJqKGDQu6g5NqMoJe/1000029393.jpg",
-        "https://cdn.steemitimages.com/DQmPHajQmar1bL1YdChKUHgfRxj7GB9BqRRfo2tjXHc2Sjn/1000029390.jpg",
-        "https://cdn.steemitimages.com/DQmPHz1E9dnwTYaLSWgo3nvZMBaqMfB1UmnQnJm7dWi2jun/1000029386.jpg",
-        "https://cdn.steemitimages.com/DQmcj2qBoXqapAYeCuKjYMMi9SqjX9zvcsfz3ALLNtWkey6/1000030902.jpg",
-        "https://cdn.steemitimages.com/DQmanjsQGweEUiHwvCPTBS6ZJrUoFtXnGFysbZjur29rGgv/1000030904.jpg",
-        "https://cdn.steemitimages.com/DQmdR2KzMjWX7CkBFdaM5MLaFNQcCsUXrA2j7UGHJbFrrg3/1000030906.jpg",
-        "https://cdn.steemitimages.com/DQmW8vogwVijfuaw1CpqJEZXqyqY2LGRbmM4LV6hafD9qS9/1000031469.jpg",
-        "https://cdn.steemitimages.com/DQmepWeHJBPigsPacAD9164nw4hA5iXJULCtfTLgcmaL245/1000030918.jpg"
-    ],
-    'eth': [
-        "https://cdn.steemitimages.com/DQmZjXLV4tVxf4eA1kTp7SD8aA4tHPfFB5icaME3S75Vwrq/1000029410.jpg",
-        "https://cdn.steemitimages.com/DQmbVoqzAaULiLwmqiKzoPHXi3kHm7Fr2v47PcgCEa6Edhw/1000029421.jpg",
-        "https://cdn.steemitimages.com/DQme94D5zNRQLaV8KVHNWjCguuFnoi7c1Ksqv8T5SM2S1Ry/1000032152.jpg",
-        "https://cdn.steemitimages.com/DQmduBC1deytMSNfK7PDbrvG6rMBHHNr3msJbQbhVgEXjyZ/1000032156.jpg",
-        "https://cdn.steemitimages.com/DQmXcaVxWDFCWH9tof911Rn3RJhMvSsybqya5Nzhg5gBNGN/1000029423.jpg", 
-        "https://cdn.steemitimages.com/DQmVTaJt1KN9hHtYc5uoP1xCVcb1GESZPxMtBFQpnNrvHtF/1000029425.jpg", 
-        "https://cdn.steemitimages.com/DQmYDnA988Xt3oeqoKeXMNRsU3PcnNHviXhy6698tfnsku2/1000029427.jpg",
-        "https://cdn.steemitimages.com/DQmaLZ21PdPH4EjE3zxxqi5afqU7k4Ao15rWv5JzrrHpALr/1000030908.jpg",
-        "https://cdn.steemitimages.com/DQmUBLfaduMaCNoEEQmJCmizFwLU3kQPM1Su9is5wfon7Tu/1000030910.jpg",
-        "https://cdn.steemitimages.com/DQmRMfdbySJSw3mvfuZtkSrqgBHYhbparCTXERuRL6z2h6t/1000030912.jpg",
-        "https://cdn.steemitimages.com/DQmQce2rn37Niz67WA9x4mg42sfh3Me71c5Z7DaAohGPmti/1000031471.jpg",
-        "https://cdn.steemitimages.com/DQmUmqfpw8mBdWnbHexK3rJXdKpn84fuBE6BZn2X5RypMqS/1000030914.jpg"
-        
-    ],
-    'bnb': [
-        "https://cdn.steemitimages.com/DQmTq22vA2EVNZnL5jrcJkDBvNaHysT3ohvdxTAKpT42hG3/1000029429.jpg",
-        "https://cdn.steemitimages.com/DQmStbAMAUdzKgmEqRvgszFHKsk9SyXAcC3KknByF5hZhQ3/1000029431.jpg",
-        "https://cdn.steemitimages.com/DQma2eEc4b8XC7UDnayeubdcxRcWGvsbTANrBsBdiwkLAjQ/1000032187.jpg",
-        "https://cdn.steemitimages.com/DQmVQWeZxqyi5WR83p8xoNXeSzRqWRfHRJsAJ56H98wBuzW/1000029433.jpg", 
-        "https://cdn.steemitimages.com/DQmcWi98oNduVyTG68DPW1SAEMy79JUd3pws7pGYteKCq69/1000029435.jpg", 
-        "https://cdn.steemitimages.com/DQmWoYCSYxFa6V7bTXxukHqGNUjm1Wp7UfCxPfwbEGTW9dB/1000029437.jpg",
-        "https://cdn.steemitimages.com/DQmRbVyrWDVHNNZhtEh1UuiK5uwka3vFf31DC53u3LHe9SX/1000030955.jpg",
-        "https://cdn.steemitimages.com/DQmWiqcPMPRCT7JiTJy331t5pmYn9DfxhjCgjWi1Z1hfYos/1000030953.jpg",
-        "https://cdn.steemitimages.com/DQmVhMs7PGGqFfrZorU7rTkkhakBCAuiEoSAtiJTeQ8akPu/1000030949.jpg",
-        "https://cdn.steemitimages.com/DQmY7ZCySnZwemoFt4brj3nBJTP3wzYPFWrdwCqzZxM2hnB/1000031475.jpg",
-        "https://cdn.steemitimages.com/DQmbSLsDRSVYFiyRxpkGtaTr53M8wfRrcNyhFpYSmzAd3qr/1000030958.jpg"
-    ],
-    'xrp': [
-        "https://cdn.steemitimages.com/DQmYp1cCTySxFcrt5G7etnH89vLYscGoCFm9BmqenCqgQVa/1000029440.jpg",
-        "https://cdn.steemitimages.com/DQmXaVtwec72GEvQS32VccxS1ep6kYzuosVXADMtQdM5zb3/1000029443.jpg", 
-        "https://cdn.steemitimages.com/DQmRHWVy88P8ZEEbNvfPC1sXrhfDZSvamQeNP9rXyw6u5uk/1000029445.jpg",
-        "https://cdn.steemitimages.com/DQmdfZWDMgB8BZN9VmmqbsTt65YgBGw7dx6Ag5maYbWjK2d/1000032181.jpg",
-        "https://cdn.steemitimages.com/DQmcZyYaS87mKzp5QXsDKxqxZcCHUrAtJ7Mtmp8Sc8TH1K9/1000032177.jpg",
-        "https://cdn.steemitimages.com/DQmUUx52nxDwi5QrYdYhouTmi2mZDng7i85ic2ceUbZNpLZ/1000029447.jpg", 
-        "https://cdn.steemitimages.com/DQmbW54JsnnShgb5gx4YxoYdFghgZoo6QmpFGPLL6MK1ER7/1000029449.jpg",
-        "https://cdn.steemitimages.com/DQmeMyqefSn7iKiBck34ZWdVs1mjRJu9aNa9fESB4BVs4yj/1000030946.jpg",
-        "https://cdn.steemitimages.com/DQmNdoi49zohSZ6JWGUy4pA5npvN5S5MnYH8SCvZCxpLZue/1000030942.jpg",
-        "https://cdn.steemitimages.com/DQmZu8J2GEN7Nwzr7SX1HJydRVLbkHCMix68VCU3zzpcU6y/1000030940.jpg",
-        "https://cdn.steemitimages.com/DQmdvwW87DUsj87vQuRBU5VrgBiFdzNhaieC38Fp9DmKm9e/1000031477.jpg",
-        "https://cdn.steemitimages.com/DQmRt9458UkQHZw1MQXhm1wVLMGmQLo33yN56ib52Ym8qQH/1000030936.jpg"
-    ],
-    'sol': [
-        "https://cdn.steemitimages.com/DQmVHyEguXPkzKuXA3tPhwFzsYSMeQGcjUsSdNkujphBcyV/1000029451.jpg",
-        "https://cdn.steemitimages.com/DQmUXQxtLxy1w91ehztQRZgjYJoL6cAwBMkhhGCP2W3D74t/1000029453.jpg",
-        "https://cdn.steemitimages.com/DQmZ11GUCfe7bWPwGvSLcN11RWcAag4ZFEfN7tsLgPyX6ir/1000032172.jpg",
-        "https://cdn.steemitimages.com/DQmPBBUGjsdvqSqQnjefLWxR6LRoq8fUHwqh6YxXgZvT7zd/1000032161.jpg",
-        "https://cdn.steemitimages.com/DQmSvm4ahxdyRgsbong2epeeatfseDZ14bbuqm2dZFWLucq/1000029455.jpg",
-        "https://cdn.steemitimages.com/DQmQ222Kvnxd2ReLUKfPxvYr85QEFjwGmMyhW5Kaf6dypB3/1000029459.jpg",
-        "https://cdn.steemitimages.com/DQmPgFc5UokJA5DvuxshoVdnJYrqYQW3pwLYb3TniELLgZm/1000029461.jpg",
-        "https://cdn.steemitimages.com/DQmekLZRCYJPNhVvanbeFajFzee1pYoByp6L1ojnnJsPuNb/1000030934.jpg",
-        "https://cdn.steemitimages.com/DQmNdxQ76GSiPHzWTRE66dfmrgALDv4RD51MLfS5b1vrbuc/1000030930.jpg",
-        "https://cdn.steemitimages.com/DQmR4dd1LKRsw7wPeNgagTxkgWVr5cqSDPPeCNDQbKTmENm/1000030922.jpg",
-        "https://cdn.steemitimages.com/DQmYF5UgzckQA3RKQ2vQwQkiDCjmqs7Jobnq6681vFzFSLP/1000031473.jpg",
-        "https://cdn.steemitimages.com/DQmRmjT3ht3YqhpRwRoYyxgqJhkm8S7DWuzZsDjB2eh7WW7/1000030916.jpg"
-    ]
-}
+TARGET_COMMUNITY = "hive-183959"  
+CUSTOM_TAGS = ["crypto", "cryptocurrency"]
+CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc", "ethereum", "eth", "solana", "sol", "xrp", "ripple", "binance", "kr", "coingeco", "avle", "bnb", "trading", "blockchain"]
 
 # ==========================================
-# 2. KEY, ENDPOINT & ACCOUNT HEALTH SAFARDS
+# 2. DYNAMIC IMAGE GENERATOR & MULTI-CDN UPLOADER
+# ==========================================
+def generate_crypto_banner(post_title, top_coin_symbol, top_coin_name, top_coin_price, top_coin_change):
+    """
+    Generates a unique, professional landscape crypto graphic using Pillow with 
+    supersampling (2x scale downsampled via LANCZOS), procedural geometric backgrounds,
+    and automatic text wrapping to guarantee no spillage.
+    """
+    # Supersampling scale for crisp, professional anti-aliasing
+    scale = 2
+    width, height = 1200 * scale, 630 * scale
+    
+    image = Image.new("RGB", (width, height), color="#0d1117")
+    draw = ImageDraw.Draw(image, "RGBA")
+    
+    random.seed()
+    
+    # Infinite Pro-Level Theme: Randomized abstract background mesh lines with alpha
+    for _ in range(45):
+        x1 = random.randint(0, width)
+        y1 = random.randint(0, height)
+        x2 = x1 + random.randint(150 * scale, 500 * scale)
+        y2 = y1 + random.randint(100 * scale, 350 * scale)
+        line_color = random.choice([
+            "#1f6feb33", "#2ea04333", "#8957e533", "#388bfd33", "#23863633", "#bc8cff33"
+        ])
+        draw.line([x1, y1, x2, y2], fill=line_color, width=random.randint(2 * scale, 5 * scale))
+
+    # Randomized background glowing structural blobs
+    for _ in range(6):
+        cx = random.randint(150 * scale, width - 150 * scale)
+        cy = random.randint(150 * scale, height - 150 * scale)
+        r = random.randint(100 * scale, 300 * scale)
+        draw.ellipse([cx - r, cy - r, cx + r, cy + r], outline="#30363d55", width=2 * scale)
+
+    # Typography setup with proportional scaling
+    try:
+        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 44 * scale)
+        subtitle_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 28 * scale)
+        credit_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 22 * scale)
+    except IOError:
+        title_font = ImageFont.load_default()
+        subtitle_font = ImageFont.load_default()
+        credit_font = ImageFont.load_default()
+
+    # Main Card Box Container
+    box_margin = 60 * scale
+    draw.rectangle([box_margin, box_margin, width - box_margin, height - box_margin], fill="#161b22EE", outline="#30363d", width=2 * scale)
+    
+    # Robust text wrapping helper to prevent spillage
+    def wrap_text(text, font, max_width):
+        words = text.split()
+        lines = []
+        current_line = []
+        for word in words:
+            test_line = " ".join(current_line + [word])
+            # Use getlength() for accurate modern font measuring in Pillow
+            bbox = font.getbbox(test_line)
+            w = bbox[2] - bbox[0]
+            if w <= max_width:
+                current_line.append(word)
+            else:
+                if current_line:
+                    lines.append(" ".join(current_line))
+                current_line = [word]
+        if current_line:
+            lines.append(" ".join(current_line))
+        return lines
+
+    # Wrap the selected post title so it fits cleanly inside the card layout
+    max_text_width = width - (240 * scale)
+    wrapped_title_lines = wrap_text(post_title, title_font, max_text_width)
+    
+    # Render wrapped post title lines dynamically
+    current_y = 100 * scale
+    for line in wrapped_title_lines[:2]: # Max 2 lines for title
+        draw.text((100 * scale, current_y), line, fill="#ffffff", font=title_font)
+        current_y += 55 * scale
+
+    # Coin Market Info Layout
+    coin_label = f"Featured Leader: {top_coin_name} ({top_coin_symbol.upper()})"
+    price_str = f"${top_coin_price:,.2f}" if top_coin_price >= 1 else f"${top_coin_price:.4f}"
+    change_str = f"+{top_coin_change:.2f}%" if top_coin_change >= 0 else f"{top_coin_change:.2f}%"
+    change_color = "#3fb950" if top_coin_change >= 0 else "#f85149"
+
+    current_y += 20 * scale
+    draw.text((100 * scale, current_y), coin_label, fill="#8b949e", font=subtitle_font)
+    current_y += 45 * scale
+    draw.text((100 * scale, current_y), f"Price: {price_str}   |   24h Change: {change_str}", fill=change_color if top_coin_change != 0 else "#c9d1d9", font=subtitle_font)
+
+    # Author Credit (Bottom Right Corner)
+    credit_text = "Author: @blog.god"
+    credit_w, credit_h = 240 * scale, 50 * scale
+    credit_x = width - box_margin - credit_w - (20 * scale)
+    credit_y = height - box_margin - credit_h - (20 * scale)
+    
+    draw.rectangle([credit_x, credit_y, credit_x + credit_w, credit_y + credit_h], fill="#21262d", outline="#30363d", width=scale)
+    draw.text((credit_x + (20 * scale), credit_y + (12 * scale)), credit_text, fill="#58a6ff", font=credit_font)
+
+    # Downscale canvas using high-quality LANCZOS resampling for razor-sharp rendering
+    image = image.resize((1200, 630), Image.Resampling.LANCZOS)
+
+    output_filename = f"crypto_banner_{top_coin_symbol.lower()}.jpg"
+    image.save(output_filename, "JPEG", quality=95)
+    print(f"✅ Custom crystal-clear banner rendered locally: '{output_filename}'")
+    return output_filename
+
+def upload_image_to_cdn(image_path):
+    """
+    Cascading upload pipeline: Catbox.moe -> Imgur (Anonymous API) -> TmpFiles.
+    Ensures a reliable public HTTPS URL is returned.
+    """
+    with open(image_path, "rb") as f:
+        file_data = f.read()
+
+    # --- TIER 1: CATBOX.MOE ---
+    print("Uploading via Tier 1: Catbox.moe...")
+    try:
+        boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+        body = (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="reqtype"\r\n\r\n'
+            f"upload-file\r\n"
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="fileToUpload"; filename="{image_path}"\r\n'
+            f"Content-Type: image/jpeg\r\n\r\n"
+        ).encode("utf-8") + file_data + f"\r\n--{boundary}--\r\n".encode("utf-8")
+
+        req = urllib.request.Request(
+            "https://catbox.moe/user/api.php",
+            data=body,
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}", "User-Agent": "Mozilla/5.0"},
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=20) as response:
+            url = response.read().decode("utf-8").strip()
+            if url.startswith("http"):
+                print(f"✅ Catbox Upload Success: {url}")
+                return url
+    except Exception as e:
+        print(f"⚠️ Tier 1 Failed ({e}). Falling back to Tier 2...")
+
+    # --- TIER 2: IMGUR ANONYMOUS API ---
+    print("Uploading via Tier 2: Imgur API...")
+    try:
+        client_id = "546c25a59c58ad7"
+        boundary = "----ImgurBoundary7MA4YWxkTrZu0gW"
+        body = (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="image"; filename="{image_path}"\r\n'
+            f"Content-Type: image/jpeg\r\n\r\n"
+        ).encode("utf-8") + file_data + f"\r\n--{boundary}--\r\n".encode("utf-8")
+
+        req = urllib.request.Request(
+            "https://api.imgur.com/3/image",
+            data=body,
+            headers={
+                "Authorization": f"Client-ID {client_id}",
+                "Content-Type": f"multipart/form-data; boundary={boundary}",
+                "User-Agent": "Mozilla/5.0"
+            },
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=20) as response:
+            res_json = json.loads(response.read().decode())
+            if res_json.get("success"):
+                url = res_json["data"]["link"]
+                print(f"✅ Imgur Upload Success: {url}")
+                return url
+    except Exception as e:
+        print(f"⚠️ Tier 2 Failed ({e}). Falling back to Tier 3...")
+
+    # --- TIER 3: TMPFILES.ORG PUBLIC CDN ---
+    print("Uploading via Tier 3: TmpFiles CDN...")
+    try:
+        boundary = "----TmpFilesBoundary7MA4YWxkTrZu0gW"
+        body = (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="file"; filename="{image_path}"\r\n'
+            f"Content-Type: image/jpeg\r\n\r\n"
+        ).encode("utf-8") + file_data + f"\r\n--{boundary}--\r\n".encode("utf-8")
+
+        req = urllib.request.Request(
+            "https://tmpfiles.org/api/v1/upload",
+            data=body,
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}", "User-Agent": "Mozilla/5.0"},
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=20) as response:
+            res = json.loads(response.read().decode())
+            raw_url = res["data"]["url"]
+            direct_url = raw_url.replace("tmpfiles.org/", "tmpfiles.org/dl/")
+            print(f"✅ TmpFiles Public CDN Success: {direct_url}")
+            return direct_url
+    except Exception as e:
+        print(f"🚨 All CDN Upload Networks Unresponsive ({e}).")
+        return None
+
+# ==========================================
+# 3. KEY, ENDPOINT & ACCOUNT HEALTH SAFEGUARDS
 # ==========================================
 MY_PRIVATE_POSTING_KEY = os.getenv("STEEM_POSTING_KEY")
 PROXY_URL = "https://steem-proxy.gikunju.workers.dev"  
@@ -111,12 +236,10 @@ if not MY_PRIVATE_POSTING_KEY:
     print("Error: STEEM_POSTING_KEY secret is missing!")
     exit(1)
 
-# Initialize standard client connection node early for verification
 stm_check = Steem(node=[PROXY_URL], keys=[MY_PRIVATE_POSTING_KEY])
 from beem.account import Account
 account_info = Account(MY_ACCOUNT, blockchain_instance=stm_check)
 
-# Live Resource Credits Bandwidth Guard
 rc_manabar = account_info.get_rc_manabar()
 current_rc = (rc_manabar['current_mana'] / rc_manabar['max_mana']) * 100
 print(f"Account @{MY_ACCOUNT} Live Resource Credits check: {current_rc:.2f}%")
@@ -125,7 +248,6 @@ if current_rc < 80.0:
     print(f"⚠️ Safety Halt: Resource Credits dropped below threshold ({current_rc:.2f}%). Execution skipped.")
     exit(0)
 
-# Unified standard structured ledger map dictionary
 market_data = {
     'btc': {'name': 'Bitcoin', 'price': 0.0, 'change': 0.0},
     'eth': {'name': 'Ethereum', 'price': 0.0, 'change': 0.0},
@@ -134,9 +256,8 @@ market_data = {
     'sol': {'name': 'Solana', 'price': 0.0, 'change': 0.0}
 }
 
-
 # ==========================================
-# 3. CASCADING API DATA EXTRACTION LAYER
+# 4. CASCADING API DATA EXTRACTION LAYER
 # ==========================================
 data_acquired = False
 
@@ -144,101 +265,63 @@ data_acquired = False
 if not data_acquired:
     print("Primary Pipeline: Fetching live data from CoinGecko Public API...")
     try:
-        # Fully qualified API endpoint mapping your target 5 assets
         gecko_url = (
             "https://api.coingecko.com/api/v3/simple/price"
             "?ids=bitcoin,ethereum,binancecoin,ripple,solana"
             "&vs_currencies=usd"
             "&include_24hr_change=true"
         )
-
-        req = urllib.request.Request(
-            gecko_url,
-            headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-            }
-        )
-
+        req = urllib.request.Request(gecko_url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=10) as response:
             raw_json = json.loads(response.read().decode())
 
         mapping = {
-            "bitcoin": "btc",
-            "ethereum": "eth",
-            "binancecoin": "bnb",
-            "ripple": "xrp",
-            "solana": "sol",
+            "bitcoin": "btc", "ethereum": "eth",
+            "binancecoin": "bnb", "ripple": "xrp", "solana": "sol"
         }
-
         for coin_id, sym in mapping.items():
             coin = raw_json.get(coin_id, {})
             market_data[sym]["price"] = float(coin.get("usd", 0))
-            market_data[sym]["change"] = float(
-                coin.get("usd_24h_change") or 0
-            )
+            market_data[sym]["change"] = float(coin.get("usd_24h_change") or 0)
 
         if all(coin["price"] > 0 for coin in market_data.values()):
             data_acquired = True
             print("CoinGecko ingestion complete.")
-
     except Exception as e:
-        print(
-            f"⚠️ Primary Pipeline Blocked ({e}). "
-            "Forwarding request to Backup Pipeline..."
-        )
+        print(f"⚠️ Primary Pipeline Blocked ({e}). Forwarding to Backup Pipeline...")
 
 # --- SOURCE 2: BINANCE PUBLIC WEBSOCKET ---
 if not data_acquired:
     print("Secondary Pipeline: Fetching live data from Binance WebSocket...")
-
     try:
         binance_symbols = {
-            "BTCUSDT": "btc",
-            "ETHUSDT": "eth",
-            "BNBUSDT": "bnb",
-            "XRPUSDT": "xrp",
-            "SOLUSDT": "sol",
+            "BTCUSDT": "btc", "ETHUSDT": "eth",
+            "BNBUSDT": "bnb", "XRPUSDT": "xrp", "SOLUSDT": "sol"
         }
-
-        streams = "/".join(
-            f"{symbol.lower()}@ticker"
-            for symbol in binance_symbols
-        )
-
-        binance_url = (
-            "wss://stream.binance.com:9443/stream"
-            f"?streams={streams}"
-        )
+        streams = "/".join(f"{symbol.lower()}@ticker" for symbol in binance_symbols)
+        binance_url = f"wss://stream.binance.com:9443/stream?streams={streams}"
 
         prices_received = set()
         ws = websocket.create_connection(binance_url, timeout=10)
-
         try:
             while prices_received != set(binance_symbols):
                 message = json.loads(ws.recv())
                 ticker = message.get("data", {})
-
                 symbol = ticker.get("s")
                 if symbol not in binance_symbols:
                     continue
-
                 market_key = binance_symbols[symbol]
                 market_data[market_key]["price"] = float(ticker["c"])
                 market_data[market_key]["change"] = float(ticker["P"])
                 prices_received.add(symbol)
-
         finally:
             ws.close()
 
         if len(prices_received) == len(binance_symbols):
             data_acquired = True
             print("Binance WebSocket ingestion complete.")
-
     except Exception as e:
-        print(
-            f"⚠️ Secondary Pipeline Blocked ({e}). "
-            "Forwarding to Tertiary Tier..."
-        )
+        print(f"⚠️ Secondary Pipeline Blocked ({e}). Forwarding to Tertiary Tier...")
 
 # --- SOURCE 3: COINPAPRIKA PUBLIC KEYLESS ENDPOINT ---
 if not data_acquired:
@@ -248,7 +331,6 @@ if not data_acquired:
         req = urllib.request.Request(paprika_url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, timeout=12) as response:
             raw_json = json.loads(response.read().decode())
-            
             mapping = {
                 'btc-bitcoin': 'btc', 'eth-ethereum': 'eth', 
                 'bnb-binance-coin': 'bnb', 'xrp-xrp': 'xrp', 'sol-solana': 'sol'
@@ -265,16 +347,15 @@ if not data_acquired:
     except Exception as e:
         print(f"🚨 Tertiary Failure: All public data networks unresponsive ({e}).")
 
-# --- ABSOLUTE SAFETY BREAK ---
 if not data_acquired:
-    print("Safeguard Halt: Live market data unreachable. Terminating deployment loop to prevent posting old data.")
-    exit(0) # Halts context cleanly without displaying system error codes on GitHub
+    print("Safeguard Halt: Live market data unreachable. Terminating deployment loop.")
+    exit(0)
 
 # ==========================================
-# 4. SCAN BLOCKCHAIN FOR CRYPTO POST AUTHOR
+# 5. SCAN BLOCKCHAIN FOR CRYPTO POST AUTHOR
 # ==========================================
 def scan_latest_crypto_post(blockchain_instance):
-    print("Scanning blockchain history for the latest crypto-related post (tags only)...")
+    print("Scanning blockchain history for the latest crypto-related post...")
     try:
         query = {"limit": 50, "tag": ""}
         discussions = Discussions_by_created(query, blockchain_instance=blockchain_instance)
@@ -291,188 +372,242 @@ def scan_latest_crypto_post(blockchain_instance):
             if keyword_set.intersection(tags):
                 print(f"Found matching crypto post by @{author} (Permlink: {permlink})")
                 return {"author": author, "permlink": permlink}
-
     except Exception as scan_err:
-        print(f"Warning: Exception encountered during blockchain analysis scan: {scan_err}")
+        print(f"Warning: Exception encountered during blockchain scan: {scan_err}")
 
     return None
 
-
 # ==========================================
-# 5. STRUCTURE, SELECTION & LOW-RC TEXT COMPILATION
+# 6. STRUCTURE, GENERATE & COMPILE POST
 # ==========================================
-# Find the highest performer out of your active database loop dictionary keys
 top_coin_key = max(market_data.keys(), key=lambda k: market_data[k]['change'])
 top_performer = market_data[top_coin_key]
 
-# Pick a completely random target image out of the top performer's 4 dedicated URLs
-selected_display_image = random.choice(IMAGE_MATRIX[top_coin_key])
-print(f"🥇 Top Performer: {top_performer['name']} ({top_coin_key.upper()}) at {top_performer['change']:.2f}%. Selected image link variant.")
+# ==========================================
+# HUMANOID, NON-COLON TITLE POOLS (TRIPLED)
+# ==========================================
+coin_title_pools = {
+    'btc': [
+        "Bitcoin is leading the pack again today",
+        "Looks like Bitcoin is making some serious moves",
+        "Why everyone is talking about Bitcoin right now",
+        "Bitcoin is setting the pace for the whole market",
+        "Catching up with Bitcoin and today's price action",
+        "Is Bitcoin getting ready for another big breakout",
+        "Checking in on what Bitcoin is up to today",
+        "Bitcoin is stealing the spotlight once again",
+        "A closer look at how Bitcoin is performing today",
+        "Why Bitcoin is driving the conversation today",
+        "Bitcoin continues to show strong momentum today",
+        "Navigating today's market trends with Bitcoin at the helm",
+        "What the latest Bitcoin price action means for traders",
+        "Bitcoin refusing to slow down in today's session",
+        "Taking a fresh look at Bitcoin's daily chart performance",
+        "Why Bitcoin remains the talk of the crypto town",
+        "Bitcoin surprises everyone with another solid push",
+        "Breaking down the latest moves coming from Bitcoin",
+        "How Bitcoin is shaping the broader market sentiment today",
+        "An honest look at Bitcoin's trajectory right now",
+        "Bitcoin holding steady while the market fluctuates",
+        "Why early buyers are keeping a close eye on Bitcoin",
+        "Bitcoin sparks fresh excitement across the crypto community",
+        "The story behind Bitcoin's interesting moves today",
+        "Checking out why Bitcoin is outperforming expectations",
+        "Bitcoin keeps investors on their toes with today's action",
+        "A quick rundown of Bitcoin's position in the market",
+        "Why Bitcoin's current movement matters so much",
+        "Bitcoin powering through the daily session with style",
+        "Reflecting on Bitcoin's latest swing and overall strength"
+    ],
+    'eth': [
+        "Ethereum is quietly making some impressive moves",
+        "Checking out Ethereum and where the altcoins are heading",
+        "Ethereum is heating up nicely in today's market",
+        "Why Ethereum is catching everyone's attention today",
+        "Taking a walk through Ethereum's latest price swings",
+        "Ethereum is leading the altcoin charge today",
+        "Seeing some great momentum on Ethereum right now",
+        "What is going on with Ethereum today",
+        "Ethereum is making waves in the market once more",
+        "A quick check on Ethereum's daily momentum",
+        "Ethereum showing resilience in a busy trading day",
+        "Why smart contract fans are buzzing about Ethereum",
+        "Ethereum puts on a clinic in today's market session",
+        "The latest updates on Ethereum's daily price action",
+        "Ethereum stepping up its game as volume picks up",
+        "Why Ethereum is drawing a crowd in today's market",
+        "Taking stock of Ethereum's journey through the charts",
+        "Ethereum building a strong case for today's top assets",
+        "How Ethereum is reacting to the current market climate",
+        "An insightful look at Ethereum's daily trajectory",
+        "Ethereum staying right in the middle of the action",
+        "Why traders are talking non-stop about Ethereum today",
+        "Ethereum navigating today's volatility like a pro",
+        "A closer inspection of Ethereum's recent gains",
+        "Ethereum carving out a path of its own today",
+        "What makes Ethereum's current price move fascinating",
+        "Ethereum keeping up a steady and reliable pace",
+        "Why Ethereum supporters have a lot to smile about",
+        "Ethereum proving its worth in today's active session",
+        "Catching the latest ripples from Ethereum's ecosystem"
+    ],
+    'bnb': [
+        "BNB is showing everyone how it's done today",
+        "Catching up with BNB and the broader exchange tokens",
+        "BNB is putting on a solid show in today's market",
+        "Why BNB is standing out among the top coins",
+        "Taking a quick look at BNB's price action today",
+        "BNB is making some nice headway in the charts",
+        "Keeping an eye on BNB as it leads the board",
+        "BNB is looking pretty strong in today's session",
+        "What's driving BNB's latest moves today",
+        "BNB is holding its ground and leading the gainers",
+        "BNB continues to impress with steady daily growth",
+        "Why utility token enthusiasts love what BNB is doing",
+        "BNB makes a notable impression in today's trading",
+        "A quick dive into BNB's latest market position",
+        "BNB showing genuine strength during today's session",
+        "Why BNB is earning praise across the crypto forums",
+        "Taking a closer look at BNB's persistent momentum",
+        "BNB navigating market shifts with cool confidence",
+        "How BNB is maintaining its edge in today's market",
+        "An overview of BNB's exciting performance today",
+        "BNB proving reliable when traders need it most",
+        "Why BNB is drawing positive attention from all sides",
+        "BNB making its presence known in the upper charts",
+        "A fresh look at BNB's steady climb today",
+        "BNB holding strong against changing market winds",
+        "What's behind BNB's pleasant performance today",
+        "BNB delivering another day of solid market action",
+        "Why BNB is worth watching closely right now",
+        "BNB keeping the energy high in today's trading rounds",
+        "Reflecting on BNB's consistent daily progress"
+    ],
+    'xrp': [
+        "XRP is making some noise in the market today",
+        "Seeing a nice push from XRP in today's session",
+        "Why XRP is stealing a bit of the spotlight today",
+        "Catching up with XRP's latest price movements",
+        "XRP is putting together a solid run today",
+        "Taking a look at why XRP is leading the charts",
+        "XRP is making some interesting waves right now",
+        "A quick check on how XRP is holding up today",
+        "XRP is showing some great energy in the market",
+        "What's happening with XRP in today's trading",
+        "XRP surprising the skeptics with today's action",
+        "Why cross-border token interest is centering on XRP",
+        "XRP stepping up with a refreshing market display",
+        "A deep dive into XRP's dynamic price swings",
+        "XRP capturing the enthusiasm of daily traders",
+        "Why conversations are picking up around XRP today",
+        "Taking stock of XRP's lively journey on the charts",
+        "XRP proving it can hold its own in any session",
+        "How XRP is managing to stand out right now",
+        "An encouraging look at XRP's latest performance",
+        "XRP keeping market watchers thoroughly engaged",
+        "Why community sentiment around XRP is looking up",
+        "XRP bouncing back with notable style today",
+        "A friendly reminder of why XRP remains popular",
+        "XRP navigating the daily ups and downs smoothly",
+        "What makes XRP's current movement worth noting",
+        "XRP delivering a pleasant surprise for holders",
+        "Why everyone seems to be tracking XRP today",
+        "XRP pushing forward with great momentum right now",
+        "Reflecting on XRP's vibrant trading session today"
+    ],
+    'sol': [
+        "Solana is flying high and leading the charge today",
+        "Checking out Solana's latest fast-paced moves",
+        "Solana is putting on quite a show in the markets",
+        "Why Solana is outperforming the crowd today",
+        "Taking a look at Solana's momentum right now",
+        "Solana is catching a serious wave in today's session",
+        "What is pushing Solana to the front of the pack",
+        "Solana is keeping things exciting in the market today",
+        "A quick check on Solana's impressive run",
+        "Solana is showing off some serious strength today",
+        "Solana refusing to slow down its rapid pace",
+        "Why speed and efficiency are bringing eyes to Solana",
+        "Solana dominating the conversation with stellar moves",
+        "A close look at Solana's blazing daily trajectory",
+        "Solana making a strong statement in the crypto space",
+        "Why traders can't stop talking about Solana today",
+        "Taking an energetic ride through Solana's charts",
+        "Solana proving its network power in real-time pricing",
+        "How Solana is leaving a mark on today's market",
+        "An exciting recap of Solana's phenomenal run",
+        "Solana keeping the market on the edge of its seat",
+        "Why momentum seekers are leaning toward Solana today",
+        "Solana charging ahead with remarkable confidence",
+        "A fresh look at why Solana is scaling new heights",
+        "Solana thriving amidst high market energy today",
+        "What's fueling Solana's unstoppable momentum right now",
+        "Solana delivering a masterclass in daily performance",
+        "Why Solana is the coin everyone is tracking today",
+        "Solana powering through resistance levels like a breeze",
+        "Reflecting on Solana's incredible day in the markets"
+    ]
+}
 
-now_eat = datetime.datetime.utcnow() + datetime.timedelta(hours=3) # UTC to EAT
+# Select title based specifically on the top coin performer
+selected_pool = coin_title_pools.get(top_coin_key, coin_title_pools['btc'])
+post_title = random.choice(selected_pool)
+
+# Generate local banner featuring the selected post title at the top
+local_banner_path = generate_crypto_banner(
+    post_title=post_title,
+    top_coin_symbol=top_coin_key,
+    top_coin_name=top_performer['name'],
+    top_coin_price=top_performer['price'],
+    top_coin_change=top_performer['change']
+)
+
+uploaded_image_url = upload_image_to_cdn(local_banner_path)
+if not uploaded_image_url:
+    print("🚨 Critical: Image upload failed across all CDN tiers. Aborting post broadcast.")
+    exit(1)
+
+now_eat = datetime.datetime.utcnow() + datetime.timedelta(hours=3)
 
 def get_ordinal_suffix(day):
     if 11 <= day <= 13:
         return "th"
     return {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
 
-day = now_eat.day
-suffix = get_ordinal_suffix(day)
-formatted_date = f"{day}{suffix} {now_eat.strftime('%A %B %Y')}"
+formatted_date = f"{now_eat.day}{get_ordinal_suffix(now_eat.day)} {now_eat.strftime('%A %B %Y')}"
 timestamp_utc = now_eat.strftime('%H:%M EAT')
 
 def format_row(key):
     coin = market_data[key]
     emoji = "🔺 +" if coin['change'] >= 0 else "🔻"
-    # Added :.2f to format numbers >= 1 with exactly 2 decimal places
     price_str = f"${coin['price']:,.2f}" if coin['price'] >= 1 else f"${coin['price']:.4f}"
     return f"* 🪙 **{coin['name']} ({key.upper()}):** {price_str} | {emoji}{coin['change']:.2f}%"
 
-# A pool of unique human-written title prefixes to break structural repetitions
-title_variations = [
-    "The Crypto Market is Crazy Today!",
-    "What's Happening On The Crypto World?",
-    "BTC, XRP, ETH, BNB And SOLANA Are Moving!",
-    "Crypto Market Prices Update",
-    "Is a Crypto Breakout Happening Right Now?",
-    "The Complete Daily Crypto Asset Report",
-    "Where is the Crypto Market Heading Today?",
-    "A Quick Look at Today's Crypto Movements",
-    "Crypto Prices Are Shifting Fast Today!",
-    "Your Essential Daily Crypto Market Ingest",
-    "Major Volatility Hitting Top Crypto Coins!",
-    "Checking In On The Crypto World Today",
-    "Are the Top Cryptos Gaining Momentum?",
-    "Unpacking Today's Crypto Market Action",
-    "The Big 5 Cryptos Are Shaking Up the Market!",
-    "A Quick Breakdown of Today's Crypto Prices",
-    "An Interesting Day in the Crypto Space!",
-    "Tracking Today's Top Cryptocurrencies",
-    "The Latest Shifts in the Crypto Market",
-    "Where the Top 5 Crypto Coins Stand Today",
-    "Digital Gold Moves: Today's Bitcoin & Altcoin Action",
-    "Decentralized Markets on Fire - Your Crypto Update",
-    "Blockchain Surge: Which Coins Are Leading Today?",
-    "Altseason Signals? Tracking the Top 5 Performers",
-    "Crypto Momentum Check: Real-Time Market Snapshot",
-    "The DeFi Effect: How the Market is Shifting Now",
-    "Hodlers' Guide: Today's Most Volatile Digital Assets",
-    "From Bitcoin to Solana: Market Movements Explained",
-    "Tokenomics in Action: Live Crypto Price Analysis",
-    "The Weekly Crypto Pulse: Major Shifts Happening",
-    "Smart Money Alert: Where Crypto Prices Are Heading",
-    "Layer 2 vs Layer 1: Who's Winning Today?",
-    "Mining the Data: Your Daily Blockchain Market Brief",
-    "Whale Watch: Tracking Big Moves in Today's Crypto",
-    "The Bull's Handbook: Essential Daily Crypto Metrics",
-    "Staking Spotlight: Coins Making Waves in the Market",
-    "Mempool Meter: Real-Time Crypto Market Insights",
-    "The Bear Case & Bull Case for Today's Top Cryptos",
-    "Exchange Flows: Understanding Today's Price Action",
-    "Bullish Signals: Is Crypto Ready for Liftoff?",
-    "Bitcoin Breakout Watch: The Market Is Moving Fast",
-    "Volatility Spikes: Altcoins Lead the Charge Today",
-    "Crypto Heatmap: Biggest Movers in the Digital Market",
-    "The Smart Investor's Daily Crypto Trend Report",
-    "Ethereum Pulse: Is the Bull Run Back in Motion?",
-    "Signal from the Chain: What Crypto Traders Need to Know",
-    "Top Coins in Motion: A Fresh Market Snapshot",
-    "Bitcoin, Ethereum, and the Rest of the Pack",
-    "The Daily Crypto Rush: Winners and Losers",
-    "Market Momentum Watch: Crypto Prices Are Shifting",
-    "When Crypto Turns Hot: The Biggest Gainers Today",
-    "Inside the Crypto Cycle: What Is Really Happening?",
-    "New Highs or Fakeouts? Breaking Down Today's Moves",
-    "The Next Crypto Wave: Which Coins Are Heating Up?",
-    "Weekend Crypto Watch: Price Action Across the Board",
-    "On-Chain Signals: What the Market Is Telling Us",
-    "Risk On, Risk Off: Crypto Is Moving Again",
-    "The Highest Movers: A Quick Crypto Market Rundown",
-    "Big Moves, Big Charts: Today's Crypto Leaders",
-    "As Bitcoin Moves, the Altcoins Follow Suit",
-    "Crypto Gains and Losses: The Daily Breakdown",
-    "The Market's Pulse: A Quick Look at Top Tokens",
-    "Fresh Crypto Data: A Daily Shot of Market Energy",
-    "The Digital Asset Ledger: What Changed Today?",
-    "Trend Watch: Crypto Prices Are Repricing Fast",
-    "Momentum in Motion: A Closer Look at the Top Coins",
-    "Chain Reaction: Where Crypto Is Heading Today",
-    "Directional Bias: Which Crypto Assets Are Leading?",
-    "Top Crypto Movers: Price Action You Can't Ignore",
-    "Daily Market Fuel: The Biggest Crypto Stories Today",
-    "Moonshot Watch: Which Coins Are Leading The Surge?",
-    "The Crypto Pulse: Trading Activity Is Building",
-    "Market Rotation: Which Coins Are Taking the Lead?",
-    "A Hot Day in Crypto: Gains, Losses, and Breakouts",
-    "The Weekly Crypto Watch: Trends Shaping the Market",
-    "Bitcoin and Friends: A Quick Read of Today's Moves",
-    "Crypto Ladder: Who Is Climbing Highest Right Now?",
-    "Price Action Review: Today's Top Digital Assets",
-    "Breaking Down the Big 5: Crypto Winners and Losers",
-    "The Crypto Board Is Moving: A Fast Market Update",
-    "Big Volume, Big Questions: What Crypto Is Saying",
-    "Bullish Pressure: Which Coins Are Leading the Rally?",
-    "Fresh Crypto Signals: The Market Is Getting Active",
-    "From Bitcoin to Solana: The Top Coin Story Today",
-    "Trading the Tape: Today's Biggest Crypto Moves",
-    "The Major Coins Are Talking: Here's What They Mean",
-    "The Crypto Market Is Stirring Again: What to Watch"
-]
-selected_prefix = random.choice(title_variations)
-post_title = f"{selected_prefix}"
-
-# ==========================================
-# 6. DYNAMIC TITLE-BASED PERMLINK SLUG LOGIC
-# ==========================================
-# 1. Transform the randomly chosen prefix to lowercase
-raw_slug = selected_prefix.lower()
-# 2. Safely strip special characters using basic loop text filtering
+raw_slug = post_title.lower()
 clean_chars = [char if char.isalnum() or char.isspace() else "" for char in raw_slug]
-# 3. Clean up spaces and join strings using standard hyphens
 slug_str = "-".join("".join(clean_chars).split())
-# 4. Combine the dynamic prefix slug with the current date to guarantee uniqueness
 post_permlink = f"{slug_str}-{now_eat.strftime('%Y%m%d')}"
 scanned_post_data = scan_latest_crypto_post(stm_check)
 
-
-
-print(f"✅ Dynamic Title Generated: '{post_title}'")
+print(f"✅ Dynamic Title Generated for [{top_coin_key.upper()}]: '{post_title}'")
 print(f"✅ Matching Permlink Slug compiled: '{post_permlink}'")
 
-# Compile the final Markdown text array payload
 body_lines = [
     f"\n**{formatted_date}**  🕘 *{timestamp_utc}*\n",
     "*Layout provided by [Steemit Enhancer hommage](https://chromewebstore.google.com/detail/empty-title/gepddagaajclednflogimfmpoejjkcnj) by ayogom*\n",
     "⚠️FOR INFORMATION PURPOSES ONLY. NOT INVESTMENT ADVICE.\n",
     "Latest Prices (The Big Five):\n",
-    format_row('btc'),
-    format_row('eth'),
-    format_row('bnb'),
-    format_row('xrp'),
-    format_row('sol'),
+    format_row('btc'), format_row('eth'), format_row('bnb'), format_row('xrp'), format_row('sol'),
     f"\n🔺**Top Gainer:** {top_coin_key.upper()}\n",
-    f"![{selected_prefix}]({selected_display_image})",
-    "[Bengali Blog](https://www.steemit.com/trending/hive-129948) & [Discord](https://discord.gg/amarbanglablog)\n",
-    "https://cdn.steemitimages.com/DQmZvVRHsowjHm4n9wHe1VvXceqbaTUYsquTVAUX9GsBQcf/IMG_20220926_174120.png\n",
-    "Vote @bangla.witness Or Set @rme as your [proxy](https://steemitwallet.com/witnesses)\n",
-    "https://cdn.steemitimages.com/DQmRXkkCEbXLYwhPEYqkaUbwhy4FaqarQVhnzkh1Awp3GRw/witness_proxy_vote.png\n",
+    f"![{post_title}]({uploaded_image_url})",
     f'<div class="footer">\n  <div class="pull-left">\n    Author: @blog.god\n  </div>\n  <div class="pull-right">\n    <img src="https://cdn.steemitimages.com/DQmeJV5dmDXBLXQHGxdfsDggpQNgBymH7wuuQSZ4pmyACVi/1000029381.png" alt="Footer" />\n  </div>\n</div>\n<div class="pull-left">\n  ©EGM 2016 - 2036\n</div>'
 ]
 
-# Only inject the shout-out if a valid post was successfully scanned
 if scanned_post_data:
     author = scanned_post_data["author"]
     permlink = scanned_post_data["permlink"]
-    # Build the official Steemit deep link to the original post
     steemit_url = f"https://steemit.com/@{author}/{permlink}"
-    
-    # Format the shout-out line with an embedded hyperlink to the post
-    shoutout_text = (
-        f"A big shout-out to @{author} for keeping up with the crypto space today! "
-        f"Check out their latest update here: **[{permlink}]({steemit_url})**\n"
-    )
-    
-    # Placed at index 1 to keep it near the top of the post as requested
+    shoutout_text = f"A big shout-out to @{author} for keeping up with the crypto space today! Check out their latest update here: **[{permlink}]({steemit_url})**\n"
     body_lines.insert(1, shoutout_text)
 
 post_body = "\n".join(body_lines)
