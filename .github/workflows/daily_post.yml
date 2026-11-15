@@ -44,4 +44,3 @@ jobs:
           STEEM_POSTING_KEY: ${{ secrets.STEEM_POSTING_KEY }}
           PYTHONUNBUFFERED: '1'
         run: python post_bot.py
-        
