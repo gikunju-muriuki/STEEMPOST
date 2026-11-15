@@ -63,7 +63,7 @@ def generate_candlestick_chart(post_title, top_coin_symbol, top_coin_name, ohlc_
 
     # Unique dynamic text/watermark injection based on exact timestamp & hash to guarantee absolute uniqueness
     unique_run_id = f"REF-{int(time.time())}-{random.randint(10000, 99999)}"
-    chart_title = f"{top_coin_name} ({top_coin_symbol.upper()}) Live Candlestick Session\nID: {unique_run_id}"
+    chart_title = f"{top_coin_name} ({top_coin_symbol.upper()}) Live Candlestick Session\nID: {unique_run_id}\n@{MY_ACCOUNT}"
 
     # Custom White Market Style with Black Typography & Professional Candlesticks
     market_colors = mpf.make_marketcolors(
@@ -221,7 +221,7 @@ rc_manabar = account_info.get_rc_manabar()
 current_rc = (rc_manabar['current_mana'] / rc_manabar['max_mana']) * 100
 print(f"Account @{MY_ACCOUNT} Live Resource Credits check: {current_rc:.2f}%")
 
-if current_rc < 75.0:
+if current_rc < 70.0:
     print(f"⚠️ Safety Halt: Resource Credits dropped below threshold ({current_rc:.2f}%). Execution skipped.")
     exit(0)
 
