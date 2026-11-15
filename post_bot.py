@@ -26,12 +26,20 @@ time.sleep(random_delay_seconds)
 # =========================================================================
 
 # ==========================================
-# 1. CONFIGURATION VARIABLES
+# 1. CONFIGURATION VARIABLES & PROXY FALLBACK
 # ==========================================
 MY_ACCOUNT = "blog.god"  
 TARGET_COMMUNITY = "hive-129948"  
 CUSTOM_TAGS = ["crypto", "steemexclusive", "club75", "club5050", "finance"]
 CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc", "blockchain"]
+
+# Multi-node cascading proxy fallback list for high reliability
+STEEM_NODES = [
+    "https://steem-proxy.gikunju.workers.dev", # Primary Custom Cloudflare Worker Proxy
+    "https://api.steemit.com",                  # Official Steemit API
+    "https://api.justyy.com",                   # Public Community Node
+    "https://api.steemworld.org"                # Steemworld Public Endpoint
+]
 
 # ==========================================
 # 2. PROFESSIONAL CANDLESTICK CHART GENERATOR & UPLOADER
@@ -199,13 +207,13 @@ def upload_image_to_cdn(image_path):
 # 3. KEY, ENDPOINT & ACCOUNT HEALTH SAFEGUARDS
 # ==========================================
 MY_PRIVATE_POSTING_KEY = os.getenv("STEEM_POSTING_KEY")
-PROXY_URL = "https://steem-proxy.gikunju.workers.dev"  
 
 if not MY_PRIVATE_POSTING_KEY:
     print("Error: STEEM_POSTING_KEY secret is missing!")
     exit(1)
 
-stm_check = Steem(node=[PROXY_URL], keys=[MY_PRIVATE_POSTING_KEY])
+print(f"Initializing Steem client with node fallback list: {STEEM_NODES}")
+stm_check = Steem(node=STEEM_NODES, keys=[MY_PRIVATE_POSTING_KEY])
 from beem.account import Account
 account_info = Account(MY_ACCOUNT, blockchain_instance=stm_check)
 
@@ -625,8 +633,8 @@ post_body = "\n".join(body_lines)
 # 7. BLOCKCHAIN TRANSMISSION HANDSHAKE
 # ==========================================
 try:
-    print(f"Connecting to Steem node: {PROXY_URL}")
-    stm = Steem(node=[PROXY_URL], keys=[MY_PRIVATE_POSTING_KEY])
+    print(f"Connecting to Steem nodes with automatic fallback enabled...")
+    stm = Steem(node=STEEM_NODES, keys=[MY_PRIVATE_POSTING_KEY])
     print(f"Posting on {TARGET_COMMUNITY}.")
     
     stm.post(
