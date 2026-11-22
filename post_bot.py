@@ -1,155 +1,320 @@
-import os
 import datetime
-import time 
-import random 
 import json
+import os
+import random
+import time
+import urllib.parse
 import urllib.request
-import io
-import pandas as pd
+
 import matplotlib
-matplotlib.use('Agg') # Non-interactive backend for server environments
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import mplfinance as mpf
-from PIL import Image
+import pandas as pd
 from beem import Steem
-from beem.comment import Comment
+from beem.account import Account
 from beem.discussions import Discussions_by_created
-import websocket
 
 # =========================================================================
 # GITHUB ACTIONS RUNTIME DELAY BUFFER
 # =========================================================================
-random_delay_seconds = random.randint(60, 900)
-print(f"Cloudflare handshake cleared. Shifting execution delay to GitHub Actions context...")
-print(f"Jitter activated: Sleeping for {random_delay_seconds / 60:.1f} minutes before posting...")
+random_delay_seconds = random.randint(60, 600)
+print(f"[DELAY] Sleeping {random_delay_seconds / 60:.1f} minutes before running...")
 time.sleep(random_delay_seconds)
+
 # =========================================================================
+# 1. CONFIGURATION
+# =========================================================================
+MY_ACCOUNT = "blog.god"
+TARGET_COMMUNITY = "hive-129948"
+CUSTOM_TAGS = ["crypto", "steemexclusive", "club100", "marketupdate"]
+CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc", "blockchain", "solana", "ethereum"]
+MIN_RC_THRESHOLD = 75.0
+FOOTER_IMAGE_URL = "https://cdn.steemitimages.com/DQmeJV5dmDXBLXQHGxdfsDggpQNgBymH7wuuQSZ4pmyACVi/1000029381.png"
+HOMMAGE_URL = "https://chromewebstore.google.com/detail/empty-title/gepddagaajclednflogimfmpoejjkcnj"
 
-# ==========================================
-# 1. CONFIGURATION VARIABLES & PROXY FALLBACK
-# ==========================================
-MY_ACCOUNT = "blog.god"  
-TARGET_COMMUNITY = "hive-129948"  
-CUSTOM_TAGS = ["crypto", "steemexclusive", "club100", "steemhunt"]
-CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc", "blockchain"]
-
-# Multi-node cascading proxy fallback list for high reliability
 STEEM_NODES = [
     "https://api.moecki.online",
     "https://api.campingclub.me",
     "https://api2.justyy.com",
     "https://api3.justyy.com",
-    "https://steem-proxy.gikunju.workers.dev"
+    "https://steem-proxy.gikunju.workers.dev",
 ]
 
-# ==========================================
-# 2. PROFESSIONAL CANDLESTICK CHART GENERATOR & UPLOADER
-# ==========================================
-def generate_candlestick_chart(post_title, top_coin_symbol, top_coin_name, ohlc_data_list):
-    """
-    Generates a professional white-background candlestick chart using mplfinance & pandas,
-    incorporating real-time market OHLC data, dynamic timestamps, and unique per-run metadata.
-    """
-    print(f"Rendering professional candlestick chart for {top_coin_name} ({top_coin_symbol.upper()})...")
-    
-    # Parse OHLC list into a Pandas DataFrame
-    # CoinGecko ohlc structure: [timestamp_ms, open, high, low, close]
-    df = pd.DataFrame(ohlc_data_list, columns=['timestamp', 'Open', 'High', 'Low', 'Close'])
-    df['Date'] = pd.to_datetime(df['timestamp'], unit='ms')
-    df.set_index('Date', inplace=True)
-    df.drop(columns=['timestamp'], inplace=True)
-    
-    # Add synthetic Volume column for visual completeness (proportional to price movement range)
-    df['Volume'] = (df['High'] - df['Low']) * random.uniform(1000, 5000)
+COIN_META = {
+    "btc": {"name": "Bitcoin", "gecko_id": "bitcoin", "terms": ["bitcoin", "btc"]},
+    "eth": {"name": "Ethereum", "gecko_id": "ethereum", "terms": ["ethereum", "eth"]},
+    "bnb": {"name": "BNB", "gecko_id": "binancecoin", "terms": ["bnb", "binance"]},
+    "xrp": {"name": "XRP", "gecko_id": "ripple", "terms": ["xrp", "ripple"]},
+    "sol": {"name": "Solana", "gecko_id": "solana", "terms": ["solana", "sol"]},
+}
 
-    # Unique dynamic text/watermark injection based on exact timestamp & hash to guarantee absolute uniqueness
+# =========================================================================
+# 2. TITLE & BODY POOLS (30+ PER COIN & 30+ BODY TEMPLATES)
+# =========================================================================
+TITLES_BY_COIN = {
+    "btc": [
+        "{name} ({sym}) Takes Center Stage at {price_str}",
+        "Why {name} Leads Today's Crypto Session ({change_str})",
+        "{name} Market Pulse: Watching Momentum Around {price_str}",
+        "{name} Sets the Pace With a {change_str} Move Over 24 Hours",
+        "Spotlight on {name}: Trading Near {price_str} Today",
+        "{name} ({sym}) Front and Center Amid {change_str} Session Shift",
+        "How {name} Is Performing at {price_str} Right Now",
+        "{name} Steals the Session Lead With {change_str} Action",
+        "Key Price Check: {name} Hovering Around {price_str}",
+        "{name} ({sym}) Drives Today's Top-Mover Conversation ({change_str})",
+        "Inside {name}'s Latest 24h Move to {price_str}",
+        "{name} Captures Market Attention With a {change_str} Swing",
+        "Tracking {name} ({sym}) as Price Holds Near {price_str}",
+        "{name} Leads the Pack Today ({change_str}) — What Stands Out",
+        "Daily {name} Readout: {price_str} and {change_str} Over 24h",
+        "{name} ({sym}) Outpaces Majors on a {change_str} Move",
+        "Market Check-In: {name} Moving {change_str} Around {price_str}",
+        "{name} Holds the Spotlight at {price_str} Today",
+        "{name} ({sym}) Shows {change_str} Shift in Active Trading",
+        "Where {name} Stands Today: {price_str} ({change_str})",
+        "{name} Commands Attention With a {change_str} 24h Change",
+        "Session Watch: {name} ({sym}) at {price_str}",
+        "{name} Tops Today's Tracker With {change_str} Momentum",
+        "Reading {name}'s Price Action Around {price_str} ({change_str})",
+        "{name} ({sym}) Headlines Today's Market Snapshot at {price_str}",
+        "24h {name} Recap: {change_str} Move Near {price_str}",
+        "{name} Sets Today's Tone at {price_str} ({change_str})",
+        "Chart & Price Focus: {name} ({sym}) Trading at {price_str}",
+        "{name} Leads Daily Movers With a {change_str} Shift",
+        "Latest {name} Check: {price_str} as Activity Continues",
+        "{name} ({sym}) in Focus Following a {change_str} 24h Move",
+        "Today's {name} Spotlight: {price_str} ({change_str})",
+    ],
+    "eth": [
+        "{name} ({sym}) Leads Major Movers at {price_str}",
+        "{name} Activity Picks Up With a {change_str} 24h Shift",
+        "Inside {name}'s Latest Move Around {price_str}",
+        "{name} ({sym}) Takes Today's Lead With {change_str} Action",
+        "Smart-Contract Spotlight: {name} Trading Near {price_str}",
+        "{name} Posts a {change_str} Move Across the Last 24 Hours",
+        "Where {name} ({sym}) Sits Today: {price_str} ({change_str})",
+        "{name} Draws Session Focus at {price_str} Today",
+        "Tracking {name}'s {change_str} Shift Around {price_str}",
+        "{name} ({sym}) Front and Center at {price_str}",
+        "Daily {name} Snapshot: {change_str} Move Near {price_str}",
+        "{name} Leads Today's Tracked Coins ({change_str})",
+        "Market Pulse on {name}: Hovering Around {price_str}",
+        "{name} ({sym}) Registers a {change_str} 24h Change",
+        "Session Check: {name} at {price_str} ({change_str})",
+        "{name} Sets the Pace Today With {change_str} Momentum",
+        "Price & Chart Watch: {name} ({sym}) Near {price_str}",
+        "{name} Stands Out Today at {price_str} ({change_str})",
+        "24-Hour {name} Update: {change_str} Shift Around {price_str}",
+        "{name} ({sym}) Tops Daily Movers at {price_str}",
+        "Watching {name} Move {change_str} to {price_str}",
+        "{name} in the Spotlight Today ({change_str}) at {price_str}",
+        "Latest {name} ({sym}) Readout: {price_str} ({change_str})",
+        "{name} Captures Today's Top-Mover Spot at {price_str}",
+        "Intraday & Daily View: {name} Near {price_str} ({change_str})",
+        "{name} ({sym}) Logs a {change_str} Move in Today's Session",
+        "{name} Market Check: Trading at {price_str} ({change_str})",
+        "Today's {name} Pace: {change_str} Around {price_str}",
+        "{name} ({sym}) Holds Focus With a {change_str} Shift",
+        "A Closer Look at {name} at {price_str} Today",
+        "{name} Leads the Board With {change_str} Over 24 Hours",
+        "{name} ({sym}) Price & Momentum Check at {price_str}",
+    ],
+    "bnb": [
+        "{name} ({sym}) Paces the Market at {price_str}",
+        "{name} Posts a {change_str} Move as Traders Watch Key Levels",
+        "{name} Market Check: Trading Near {price_str} ({change_str})",
+        "{name} ({sym}) Takes Today's Top Spot With {change_str}",
+        "Spotlight on {name} at {price_str} in Today's Session",
+        "{name} Moves {change_str} Over 24 Hours Near {price_str}",
+        "Where {name} ({sym}) Stands Today: {price_str} ({change_str})",
+        "{name} Leads Today's Tracker With a {change_str} Shift",
+        "Daily {name} Focus: {price_str} and {change_str} Action",
+        "{name} ({sym}) Draws Attention at {price_str}",
+        "Tracking {name}'s Latest {change_str} Swing Around {price_str}",
+        "{name} Front and Center Today ({change_str}) at {price_str}",
+        "Session Watch on {name} ({sym}): {price_str} ({change_str})",
+        "{name} Registers a {change_str} 24h Move Near {price_str}",
+        "Inside {name}'s Price Action at {price_str} Today",
+        "{name} ({sym}) Outpaces Peers With {change_str} Over 24h",
+        "Market Readout: {name} at {price_str} ({change_str})",
+        "{name} Holds Today's Lead With a {change_str} Change",
+        "24h {name} ({sym}) Check: {price_str} ({change_str})",
+        "{name} Captures Attention Around {price_str} Today",
+        "Watching {name} ({sym}) Move {change_str} Near {price_str}",
+        "{name} Tops Today's List at {price_str} ({change_str})",
+        "Current {name} Pulse: {change_str} Shift Around {price_str}",
+        "{name} ({sym}) in Focus Today at {price_str}",
+        "Daily {name} Mover Report: {price_str} ({change_str})",
+        "{name} Sets Today's Pace With {change_str} Action",
+        "Price Check on {name} ({sym}): Hovering Near {price_str}",
+        "{name} Stands Out Today With a {change_str} Move",
+        "Latest {name} View: {price_str} ({change_str}) Over 24h",
+        "{name} ({sym}) Leads Session Movers at {price_str}",
+        "Today's {name} Snapshot: {change_str} Near {price_str}",
+        "{name} ({sym}) Momentum Check at {price_str} ({change_str})",
+    ],
+    "xrp": [
+        "{name} ({sym}) Draws Attention at {price_str}",
+        "{name} Moves {change_str} Over 24 Hours in Active Trading",
+        "Tracking {name}'s Latest Swing Around {price_str}",
+        "{name} ({sym}) Leads Today's Movers With {change_str}",
+        "Spotlight on {name} at {price_str} ({change_str})",
+        "{name} Posts a {change_str} 24h Shift Near {price_str}",
+        "Where {name} ({sym}) Sits Today: {price_str} ({change_str})",
+        "{name} Takes the Lead Today With {change_str} Action",
+        "Daily {name} Readout: {price_str} and {change_str} Move",
+        "{name} ({sym}) in Focus Around {price_str} Today",
+        "Watching {name}'s {change_str} Change Near {price_str}",
+        "{name} Tops Today's Tracked Assets ({change_str})",
+        "Market Check: {name} ({sym}) Trading at {price_str}",
+        "{name} Registers a {change_str} Move Over 24 Hours",
+        "Session Focus on {name} at {price_str} ({change_str})",
+        "{name} ({sym}) Sets Today's Pace With {change_str}",
+        "Inside {name}'s Latest Move to {price_str} ({change_str})",
+        "{name} Stands Out Today Near {price_str} ({change_str})",
+        "24-Hour {name} ({sym}) Update: {change_str} at {price_str}",
+        "{name} Captures Today's Lead at {price_str}",
+        "Price Watch on {name}: {change_str} Shift Around {price_str}",
+        "{name} ({sym}) Leads Daily Movers ({change_str})",
+        "Current {name} Snapshot: {price_str} ({change_str})",
+        "{name} Draws Session Focus Near {price_str} Today",
+        "Daily {name} ({sym}) Pulse: {change_str} at {price_str}",
+        "{name} Moves {change_str} Today as Activity Plays Out",
+        "Chart & Price Check: {name} at {price_str} ({change_str})",
+        "{name} ({sym}) Front and Center With {change_str} Move",
+        "Latest {name} Check: {price_str} ({change_str}) Over 24h",
+        "{name} Leads Today's Board at {price_str} ({change_str})",
+        "Today's {name} ({sym}) Spotlight: {price_str}",
+        "{name} Momentum Watch: {change_str} Around {price_str}",
+    ],
+    "sol": [
+        "{name} ({sym}) Sparks Momentum at {price_str}",
+        "{name} Leads Daily Pace With a {change_str} Shift",
+        "{name} Market Watch: Trading Near {price_str}",
+        "{name} ({sym}) Tops Today's Movers With {change_str}",
+        "Spotlight on {name} at {price_str} ({change_str}) Today",
+        "{name} Posts a {change_str} 24h Move Around {price_str}",
+        "Where {name} ({sym}) Stands Today: {price_str} ({change_str})",
+        "{name} Takes Today's Lead With {change_str} Action",
+        "Daily {name} Check: {price_str} and {change_str} Over 24h",
+        "{name} ({sym}) in Focus Near {price_str} Today",
+        "Tracking {name}'s {change_str} Swing Around {price_str}",
+        "{name} Leads Today's Tracked Coins ({change_str})",
+        "Session Pulse on {name} ({sym}): {price_str} ({change_str})",
+        "{name} Registers a {change_str} Shift Over 24 Hours",
+        "Inside {name}'s Latest Move at {price_str} Today",
+        "{name} ({sym}) Paces the Board With {change_str}",
+        "Market Check-In: {name} Near {price_str} ({change_str})",
+        "{name} Stands Out Today at {price_str} ({change_str})",
+        "24h {name} ({sym}) Readout: {change_str} Around {price_str}",
+        "{name} Captures the Session Lead at {price_str}",
+        "Watching {name} Move {change_str} to {price_str} Today",
+        "{name} ({sym}) Tops Daily Movers at {price_str} ({change_str})",
+        "Current {name} Focus: {change_str} Move Near {price_str}",
+        "{name} Draws Attention Today at {price_str} ({change_str})",
+        "Daily {name} ({sym}) Update: {price_str} ({change_str})",
+        "{name} Sets Today's Tone With {change_str} Over 24h",
+        "Price & Chart Watch: {name} at {price_str} ({change_str})",
+        "{name} ({sym}) Front and Center Around {price_str}",
+        "Latest {name} View: {change_str} Shift Near {price_str}",
+        "{name} Leads Today's Snapshot ({change_str}) at {price_str}",
+        "Today's {name} ({sym}) Watch: {price_str} ({change_str})",
+        "{name} Momentum & Price Check at {price_str}",
+    ],
+}
+
+BODY_TEMPLATES = [
+    "On **{formatted_date}** (*{timestamp_str}*), **{name} ({sym})** claims the top spot among our tracked coins at **{price_str}**, logging a 24-hour move of **{change_str}**. Current action points to {direction}, while **{runner_up_name} ({runner_up_sym})** sits next on the board at **{runner_up_price}** ({runner_up_change}). The chart below tracks **{sym}** across recent candles.",
+    "Today's market check for **{formatted_date}** (*{timestamp_str}*) puts **{name} ({sym})** in the driver's seat at **{price_str}** (**{change_str}** over 24 hours). Traders are seeing {direction} on **{name}**, compared with **{runner_up_name} ({runner_up_sym})** at **{runner_up_price}** ({runner_up_change}). Check the candlestick view below for **{sym}**.",
+    "Looking at **{formatted_date}** (*{timestamp_str}*), **{name} ({sym})** stands out with a **{change_str}** 24-hour move to **{price_str}**. That reflects {direction} for **{name}**, ahead of **{runner_up_name} ({runner_up_sym})** at **{runner_up_price}** ({runner_up_change}). The chart below shows how **{sym}** has traded.",
+    "**{name} ({sym})** leads our daily watchlist on **{formatted_date}** (*{timestamp_str}*), trading around **{price_str}** with a **{change_str}** change. Momentum shows {direction} on **{sym}**, while **{runner_up_name}** holds **{runner_up_price}** ({runner_up_change}). Review the candlestick chart below for details.",
+    "A fresh check on **{formatted_date}** (*{timestamp_str}*) shows **{name} ({sym})** moving **{change_str}** over the past 24 hours to **{price_str}**. The move highlights {direction} for **{name}**, as **{runner_up_name} ({runner_up_sym})** trades at **{runner_up_price}** ({runner_up_change}). See the **{sym}** chart below.",
+    "In this **{formatted_date}** (*{timestamp_str}*) update, **{name} ({sym})** tops our tracked majors at **{price_str}** (**{change_str}**). Activity reflects {direction} on **{name}**, while **{runner_up_name} ({runner_up_sym})** is priced at **{runner_up_price}** ({runner_up_change}). The chart below captures **{sym}**'s recent range.",
+    "**{name} ({sym})** is setting today's pace on **{formatted_date}** (*{timestamp_str}*), sitting near **{price_str}** after a **{change_str}** 24h shift. This points to {direction} for **{name}**, with **{runner_up_name} ({runner_up_sym})** at **{runner_up_price}** ({runner_up_change}). Below is the latest **{sym}** candlestick chart.",
+    "Session notes for **{formatted_date}** (*{timestamp_str}*): **{name} ({sym})** leads the group at **{price_str}** with a **{change_str}** 24-hour move. We are seeing {direction} on **{name}**, while **{runner_up_name}** trades around **{runner_up_price}** ({runner_up_change}). Inspect the **{sym}** chart below.",
+    "Today on **{formatted_date}** (*{timestamp_str}*), **{name} ({sym})** commands attention at **{price_str}** (**{change_str}** over 24h). Price behavior shows {direction} for **{name}**, while **{runner_up_name} ({runner_up_sym})** stands at **{runner_up_price}** ({runner_up_change}). The candlestick chart for **{sym}** follows below.",
+    "**{name} ({sym})** takes today's lead on **{formatted_date}** (*{timestamp_str}*), moving **{change_str}** to **{price_str}**. That keeps {direction} in focus for **{name}**, compared to **{runner_up_name} ({runner_up_sym})** at **{runner_up_price}** ({runner_up_change}). Check the **{sym}** chart below.",
+    "Tracking **{formatted_date}** (*{timestamp_str}*), **{name} ({sym})** posts a **{change_str}** 24-hour move to reach **{price_str}**. Market structure shows {direction} on **{name}**, while **{runner_up_name}** is at **{runner_up_price}** ({runner_up_change}). See **{sym}**'s candlestick chart below.",
+    "On **{formatted_date}** (*{timestamp_str}*), **{name} ({sym})** holds the top mover spot at **{price_str}** (**{change_str}**). The session reflects {direction} for **{name}**, while **{runner_up_name} ({runner_up_sym})** sits at **{runner_up_price}** ({runner_up_change}). The chart below breaks down **{sym}**.",
+    "Here is how **{name} ({sym})** is shaping up on **{formatted_date}** (*{timestamp_str}*): trading at **{price_str}** with a **{change_str}** shift over 24 hours. That signals {direction} on **{name}**, while **{runner_up_name} ({runner_up_sym})** trades at **{runner_up_price}** ({runner_up_change}). View the **{sym}** chart below.",
+    "**{name} ({sym})** leads today's lineup on **{formatted_date}** (*{timestamp_str}*), hovering around **{price_str}** (**{change_str}**). Action highlights {direction} for **{name}**, while **{runner_up_name}** sits near **{runner_up_price}** ({runner_up_change}). Below is the candlestick chart for **{sym}**.",
+    "As of **{formatted_date}** (*{timestamp_str}*), **{name} ({sym})** is our lead mover at **{price_str}** following a **{change_str}** 24h change. Current flow shows {direction} on **{name}**, while **{runner_up_name} ({runner_up_sym})** stands at **{runner_up_price}** ({runner_up_change}). Check **{sym}** on the chart below.",
+    "**{name} ({sym})** stands out on **{formatted_date}** (*{timestamp_str}*) with **{change_str}** over 24 hours to **{price_str}**. Price action points to {direction} for **{name}**, whereas **{runner_up_name} ({runner_up_sym})** is at **{runner_up_price}** ({runner_up_change}). The **{sym}** chart is right below.",
+    "Market snapshot for **{formatted_date}** (*{timestamp_str}*): **{name} ({sym})** paces the majors at **{price_str}** (**{change_str}**). That reflects {direction} on **{name}**, while **{runner_up_name}** holds **{runner_up_price}** ({runner_up_change}). See the latest candlestick chart for **{sym}** below.",
+    "On **{formatted_date}** (*{timestamp_str}*), **{name} ({sym})** registers a **{change_str}** 24-hour move around **{price_str}**. Momentum indicates {direction} for **{name}**, while **{runner_up_name} ({runner_up_sym})** trades at **{runner_up_price}** ({runner_up_change}). Review **{sym}**'s chart below.",
+    "**{name} ({sym})** is front and center on **{formatted_date}** (*{timestamp_str}*), trading at **{price_str}** with a **{change_str}** change. We see {direction} on **{name}**, while **{runner_up_name} ({runner_up_sym})** sits at **{runner_up_price}** ({runner_up_change}). The chart below displays **{sym}**.",
+    "A look at **{name} ({sym})** on **{formatted_date}** (*{timestamp_str}*) shows **{price_str}** and a **{change_str}** 24h shift. This highlights {direction} for **{name}**, while **{runner_up_name}** is at **{runner_up_price}** ({runner_up_change}). Check out the **{sym}** candlestick chart below.",
+    "Today's session on **{formatted_date}** (*{timestamp_str}*) puts **{name} ({sym})** ahead at **{price_str}** (**{change_str}**). The move points to {direction} on **{name}**, with **{runner_up_name} ({runner_up_sym})** at **{runner_up_price}** ({runner_up_change}). See **{sym}** below.",
+    "**{name} ({sym})** leads the pack on **{formatted_date}** (*{timestamp_str}*), moving **{change_str}** over 24 hours to **{price_str}**. Action shows {direction} for **{name}**, while **{runner_up_name} ({runner_up_sym})** sits near **{runner_up_price}** ({runner_up_change}). The **{sym}** chart follows below.",
+    "On **{formatted_date}** (*{timestamp_str}*), **{name} ({sym})** is trading around **{price_str}** with a **{change_str}** 24-hour move. That aligns with {direction} for **{name}**, while **{runner_up_name}** is at **{runner_up_price}** ({runner_up_change}). View the candlestick chart for **{sym}** below.",
+    "**{name} ({sym})** tops our daily check on **{formatted_date}** (*{timestamp_str}*) at **{price_str}** (**{change_str}**). Current trading reflects {direction} on **{name}**, while **{runner_up_name} ({runner_up_sym})** trades at **{runner_up_price}** ({runner_up_change}). Below is **{sym}**'s chart.",
+    "Checking in on **{formatted_date}** (*{timestamp_str}*), **{name} ({sym})** posts **{change_str}** over 24 hours to sit at **{price_str}**. This shows {direction} for **{name}**, while **{runner_up_name} ({runner_up_sym})** stands at **{runner_up_price}** ({runner_up_change}). Check the **{sym}** chart below.",
+    "**{name} ({sym})** holds the spotlight on **{formatted_date}** (*{timestamp_str}*) at **{price_str}** with a **{change_str}** change. Price action suggests {direction} on **{name}**, while **{runner_up_name}** sits at **{runner_up_price}** ({runner_up_change}). See **{sym}** on the chart below.",
+    "For **{formatted_date}** (*{timestamp_str}*), **{name} ({sym})** leads major movers at **{price_str}** (**{change_str}**). That points to {direction} for **{name}**, while **{runner_up_name} ({runner_up_sym})** is priced at **{runner_up_price}** ({runner_up_change}). The candlestick chart for **{sym}** is below.",
+    "**{name} ({sym})** moves **{change_str}** over 24 hours on **{formatted_date}** (*{timestamp_str}*), reaching **{price_str}**. We observe {direction} on **{name}**, while **{runner_up_name} ({runner_up_sym})** trades at **{runner_up_price}** ({runner_up_change}). Review **{sym}**'s chart below.",
+    "Today on **{formatted_date}** (*{timestamp_str}*), **{name} ({sym})** is our top mover at **{price_str}** with a **{change_str}** shift. Activity points to {direction} for **{name}**, while **{runner_up_name}** stands at **{runner_up_price}** ({runner_up_change}). Below is the chart for **{sym}**.",
+    "**{name} ({sym})** leads our session tracker on **{formatted_date}** (*{timestamp_str}*), trading near **{price_str}** (**{change_str}**). That reflects {direction} on **{name}**, while **{runner_up_name} ({runner_up_sym})** is at **{runner_up_price}** ({runner_up_change}). Check out **{sym}** below.",
+    "On **{formatted_date}** (*{timestamp_str}*), **{name} ({sym})** records a **{change_str}** move over 24 hours around **{price_str}**. Momentum shows {direction} for **{name}**, while **{runner_up_name} ({runner_up_sym})** sits at **{runner_up_price}** ({runner_up_change}). See the **{sym}** candlestick chart below.",
+    "**{name} ({sym})** rounds out today's lead spot on **{formatted_date}** (*{timestamp_str}*) at **{price_str}** (**{change_str}**). Market tone shows {direction} on **{name}**, while **{runner_up_name}** trades at **{runner_up_price}** ({runner_up_change}). The chart for **{sym}** is below.",
+]
+
+# =========================================================================
+# 3. CHART & CDN UPLOAD HELPERS
+# =========================================================================
+def generate_candlestick_chart(coin_key, coin_name, ohlc_data_list):
+    print(f"Rendering candlestick chart for {coin_name} ({coin_key.upper()})...")
+    df = pd.DataFrame(ohlc_data_list, columns=["timestamp", "Open", "High", "Low", "Close"])
+    df["Date"] = pd.to_datetime(df["timestamp"], unit="ms")
+    df.set_index("Date", inplace=True)
+    df.drop(columns=["timestamp"], inplace=True)
+    df["Volume"] = (df["High"] - df["Low"]).abs() * random.uniform(1000, 5000)
+
     unique_run_id = f"REF-{int(time.time())}-{random.randint(10000, 99999)}"
-    chart_title = f"{top_coin_name} ({top_coin_symbol.upper()})\nID: {unique_run_id}\n@{MY_ACCOUNT}"
+    chart_title = f"{coin_name} ({coin_key.upper()}) • ID: {unique_run_id}"
 
-    # Custom White Market Style with Black Typography & Professional Candlesticks
     market_colors = mpf.make_marketcolors(
-        up='#238636',     # Professional green for bullish candles
-        down='#da3633',   # Professional red for bearish candles
-        edge='inherit',
-        wick='inherit',
-        volume='in',
-        ohlc='black'
+        up="#238636",
+        down="#da3633",
+        edge="inherit",
+        wick="inherit",
+        volume="in",
+        ohlc="black",
     )
-    
-    white_style = mpf.make_mpf_style(
+    style = mpf.make_mpf_style(
         marketcolors=market_colors,
-        facecolor='#ffffff',
-        figcolor='#ffffff',
-        gridcolor='#eaecef',
-        gridstyle='--',
-        edgecolor='#30363d',
-        rc={
-            'font.size': 10,
-            'text.color': '#24292e',
-            'axes.labelcolor': '#24292e',
-            'xtick.color': '#24292e',
-            'ytick.color': '#24292e'
-        }
+        facecolor="#ffffff",
+        figcolor="#ffffff",
+        gridcolor="#eaecef",
+        gridstyle="--",
+        edgecolor="#30363d",
     )
 
-    # Plot figure using mplfinance
-    fig, axes = mpf.plot(
+    fig, _ = mpf.plot(
         df,
-        type='candle',
-        style=white_style,
-        title=dict(title=chart_title, fontsize=14, color='#24292e', y=1.05),
-        ylabel='Price (USD)',
-        ylabel_lower='Volume',
+        type="candle",
+        style=style,
+        title=dict(title=chart_title, fontsize=13, color="#24292e", y=1.04),
+        ylabel="Price (USD)",
+        ylabel_lower="Volume",
         volume=True,
         figratio=(12, 6.3),
         figscale=1.2,
-        returnfig=True
+        returnfig=True,
     )
 
-    output_filename = f"crypto_candlestick_{top_coin_symbol.lower()}.jpg"
-    fig.savefig(output_filename, dpi=150, bbox_inches='tight', facecolor='#ffffff')
+    output_filename = f"crypto_candlestick_{coin_key}.jpg"
+    fig.savefig(output_filename, dpi=150, bbox_inches="tight", facecolor="#ffffff")
     plt.close(fig)
-    
-    print(f"✅ Professional candlestick chart successfully rendered: '{output_filename}'")
     return output_filename
 
+
 def upload_image_to_cdn(image_path):
-    """
-    Cascading upload pipeline: Catbox.moe -> Imgur (Anonymous API) -> TmpFiles.
-    Ensures a reliable public HTTPS URL is returned.
-    """
     with open(image_path, "rb") as f:
         file_data = f.read()
 
-    # --- TIER 1: CATBOX.MOE ---
-    print("Uploading via Tier 1: Catbox.moe...")
-    try:
-        boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
-        body = (
-            f"--{boundary}\r\n"
-            f'Content-Disposition: form-data; name="reqtype"\r\n\r\n'
-            f"upload-file\r\n"
-            f"--{boundary}\r\n"
-            f'Content-Disposition: form-data; name="fileToUpload"; filename="{image_path}"\r\n'
-            f"Content-Type: image/jpeg\r\n\r\n"
-        ).encode("utf-8") + file_data + f"\r\n--{boundary}--\r\n".encode("utf-8")
-
-        req = urllib.request.Request(
-            "https://catbox.moe/user/api.php",
-            data=body,
-            headers={"Content-Type": f"multipart/form-data; boundary={boundary}", "User-Agent": "Mozilla/5.0"},
-            method="POST"
-        )
-        with urllib.request.urlopen(req, timeout=20) as response:
-            url = response.read().decode("utf-8").strip()
-            if url.startswith("http"):
-                print(f"✅ Catbox Upload Success: {url}")
-                return url
-    except Exception as e:
-        print(f"⚠️ Tier 1 Failed ({e}). Falling back to Tier 2...")
-
-    # --- TIER 2: IMGUR ANONYMOUS API ---
-    print("Uploading via Tier 2: Imgur API...")
+    # Tier 1: Imgur anonymous upload
     try:
         client_id = "546c25a59c58ad7"
         boundary = "----ImgurBoundary7MA4YWxkTrZu0gW"
@@ -165,21 +330,46 @@ def upload_image_to_cdn(image_path):
             headers={
                 "Authorization": f"Client-ID {client_id}",
                 "Content-Type": f"multipart/form-data; boundary={boundary}",
-                "User-Agent": "Mozilla/5.0"
+                "User-Agent": "Mozilla/5.0",
             },
-            method="POST"
+            method="POST",
         )
         with urllib.request.urlopen(req, timeout=20) as response:
             res_json = json.loads(response.read().decode())
-            if res_json.get("success"):
+            if res_json.get("success") and res_json.get("data", {}).get("link"):
                 url = res_json["data"]["link"]
                 print(f"✅ Imgur Upload Success: {url}")
                 return url
-    except Exception as e:
-        print(f"⚠️ Tier 2 Failed ({e}). Falling back to Tier 3...")
+    except Exception as err:
+        print(f"⚠️ Imgur upload failed: {err}")
 
-    # --- TIER 3: TMPFILES.ORG PUBLIC CDN ---
-    print("Uploading via Tier 3: TmpFiles CDN...")
+    # Tier 2: Catbox.moe
+    try:
+        boundary = "----CatboxBoundary7MA4YWxkTrZu0gW"
+        body = (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="reqtype"\r\n\r\n'
+            f"upload-file\r\n"
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="fileToUpload"; filename="{image_path}"\r\n'
+            f"Content-Type: image/jpeg\r\n\r\n"
+        ).encode("utf-8") + file_data + f"\r\n--{boundary}--\r\n".encode("utf-8")
+
+        req = urllib.request.Request(
+            "https://catbox.moe/user/api.php",
+            data=body,
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}", "User-Agent": "Mozilla/5.0"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=20) as response:
+            url = response.read().decode("utf-8").strip()
+            if url.startswith("http"):
+                print(f"✅ Catbox Upload Success: {url}")
+                return url
+    except Exception as err:
+        print(f"⚠️ Catbox upload failed: {err}")
+
+    # Tier 3: TmpFiles
     try:
         boundary = "----TmpFilesBoundary7MA4YWxkTrZu0gW"
         body = (
@@ -192,462 +382,315 @@ def upload_image_to_cdn(image_path):
             "https://tmpfiles.org/api/v1/upload",
             data=body,
             headers={"Content-Type": f"multipart/form-data; boundary={boundary}", "User-Agent": "Mozilla/5.0"},
-            method="POST"
+            method="POST",
         )
         with urllib.request.urlopen(req, timeout=20) as response:
-            res = json.loads(response.read().decode())
-            raw_url = res["data"]["url"]
-            direct_url = raw_url.replace("tmpfiles.org/", "tmpfiles.org/dl/")
-            print(f"✅ TmpFiles Public CDN Success: {direct_url}")
-            return direct_url
-    except Exception as e:
-        print(f"🚨 All CDN Upload Networks Unresponsive ({e}).")
-        return None
+            parsed = json.loads(response.read().decode())
+            raw_url = parsed.get("data", {}).get("url", "")
+            if raw_url:
+                direct_url = raw_url.replace("tmpfiles.org/", "tmpfiles.org/dl/")
+                print(f"✅ TmpFiles Upload Success: {direct_url}")
+                return direct_url
+    except Exception as err:
+        print(f"🚨 All CDN uploads failed: {err}")
 
-# ==========================================
-# 3. KEY, ENDPOINT & ACCOUNT HEALTH SAFEGUARDS
-# ==========================================
-MY_PRIVATE_POSTING_KEY = os.getenv("STEEM_POSTING_KEY")
+    return None
 
-if not MY_PRIVATE_POSTING_KEY:
-    print("Error: STEEM_POSTING_KEY secret is missing!")
-    exit(1)
+# =========================================================================
+# 4. MARKET DATA & NEWS HEADLINES FETCHERS
+# =========================================================================
+def build_synthetic_ohlc(spot_price):
+    base_ms = int(time.time() * 1000) - 86400 * 1000
+    candles = []
+    for i in range(24):
+        ts = base_ms + i * 3600 * 1000
+        o = spot_price * (1 + random.uniform(-0.01, 0.01))
+        h = o * (1 + random.uniform(0.001, 0.008))
+        l = o * (1 - random.uniform(0.001, 0.008))
+        c = l + (h - l) * random.random()
+        candles.append([ts, o, h, l, c])
+    return candles
 
-print(f"Initializing Steem client with node fallback list: {STEEM_NODES}")
-stm_check = Steem(node=STEEM_NODES, keys=[MY_PRIVATE_POSTING_KEY])
-from beem.account import Account
-account_info = Account(MY_ACCOUNT, blockchain_instance=stm_check)
 
-rc_manabar = account_info.get_rc_manabar()
-current_rc = (rc_manabar['current_mana'] / rc_manabar['max_mana']) * 100
-print(f"Account @{MY_ACCOUNT} Live Resource Credits check: {current_rc:.2f}%")
+def fetch_market_snapshot():
+    snapshot = {
+        k: {"name": v["name"], "price": 0.0, "change": 0.0, "ohlc": []}
+        for k, v in COIN_META.items()
+    }
 
-if current_rc < 70.0:
-    print(f"⚠️ Safety Halt: Resource Credits dropped below threshold ({current_rc:.2f}%). Execution skipped.")
-    exit(0)
-
-market_data = {
-    'btc': {'name': 'Bitcoin', 'price': 0.0, 'change': 0.0, 'gecko_id': 'bitcoin', 'ohlc': []},
-    'eth': {'name': 'Ethereum', 'price': 0.0, 'change': 0.0, 'gecko_id': 'ethereum', 'ohlc': []},
-    'bnb': {'name': 'BNB', 'price': 0.0, 'change': 0.0, 'gecko_id': 'binancecoin', 'ohlc': []},
-    'xrp': {'name': 'XRP', 'price': 0.0, 'change': 0.0, 'gecko_id': 'ripple', 'ohlc': []},
-    'sol': {'name': 'Solana', 'price': 0.0, 'change': 0.0, 'gecko_id': 'solana', 'ohlc': []}
-}
-
-# ==========================================
-# 4. CASCADING API DATA EXTRACTION LAYER
-# ==========================================
-data_acquired = False
-
-# --- SOURCE 1: COINGECKO PUBLIC OHLC & PRICE ENDPOINTS ---
-if not data_acquired:
-    print("Primary Pipeline: Fetching live prices and OHLC candlestick data from CoinGecko API...")
+    # Source 1: CoinGecko
     try:
-        # Fetch prices and 24h change
-        gecko_url = (
-            "https://api.coingecko.com/api/v3/simple/price"
-            "?ids=bitcoin,ethereum,binancecoin,ripple,solana"
-            "&vs_currencies=usd"
-            "&include_24hr_change=true"
-        )
-        req = urllib.request.Request(gecko_url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=10) as response:
-            raw_json = json.loads(response.read().decode())
+        ids = ",".join(v["gecko_id"] for v in COIN_META.values())
+        url = f"https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd&include_24hr_change=true"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode())
 
-        mapping = {
-            "bitcoin": "btc", "ethereum": "eth",
-            "binancecoin": "bnb", "ripple": "xrp", "solana": "sol"
-        }
-        for coin_id, sym in mapping.items():
-            coin = raw_json.get(coin_id, {})
-            market_data[sym]["price"] = float(coin.get("usd", 0))
-            market_data[sym]["change"] = float(coin.get("usd_24h_change") or 0)
+        for key, meta in COIN_META.items():
+            item = data.get(meta["gecko_id"], {})
+            snapshot[key]["price"] = float(item.get("usd") or 0.0)
+            snapshot[key]["change"] = float(item.get("usd_24h_change") or 0.0)
 
-        # Fetch real OHLC candles for each coin
-        for sym, data in market_data.items():
-            gid = data['gecko_id']
-            ohlc_url = f"https://api.coingecko.com/api/v3/coins/{gid}/ohlc?vs_currency=usd&days=1"
-            req_ohlc = urllib.request.Request(ohlc_url, headers={"User-Agent": "Mozilla/5.0"})
-            try:
-                with urllib.request.urlopen(req_ohlc, timeout=10) as ohlc_resp:
-                    market_data[sym]["ohlc"] = json.loads(ohlc_resp.read().decode())
-            except Exception as ohlc_err:
-                print(f"⚠️ Warning: Could not fetch OHLC for {sym} ({ohlc_err})")
+        for key, meta in COIN_META.items():
+            ohlc_url = f"https://api.coingecko.com/api/v3/coins/{meta['gecko_id']}/ohlc?vs_currency=usd&days=1"
+            req_o = urllib.request.Request(ohlc_url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req_o, timeout=10) as o_resp:
+                snapshot[key]["ohlc"] = json.loads(o_resp.read().decode())
 
-        if all(coin["price"] > 0 and len(coin["ohlc"]) > 0 for coin in market_data.values()):
-            data_acquired = True
-            print("CoinGecko price & OHLC candlestick ingestion complete.")
-    except Exception as e:
-        print(f"⚠️ Primary Pipeline Blocked ({e}). Forwarding to Backup Pipeline...")
+        if all(c["price"] > 0 and len(c["ohlc"]) > 0 for c in snapshot.values()):
+            print("✅ Market data loaded from CoinGecko.")
+            return snapshot
+    except Exception as err:
+        print(f"⚠️ CoinGecko fetch issue ({err}), falling back to CoinPaprika...")
 
-# --- SOURCE 2: BINANCE PUBLIC WEBSOCKET + SYNTHETIC FALLBACK OHLC ---
-if not data_acquired:
-    print("Secondary Pipeline: Fetching live data from Binance WebSocket with fallback OHLC generation...")
+    # Source 2: CoinPaprika
     try:
-        binance_symbols = {
-            "BTCUSDT": "btc", "ETHUSDT": "eth",
-            "BNBUSDT": "bnb", "XRPUSDT": "xrp", "SOLUSDT": "sol"
+        paprika_map = {
+            "btc-bitcoin": "btc",
+            "eth-ethereum": "eth",
+            "bnb-binance-coin": "bnb",
+            "xrp-xrp": "xrp",
+            "sol-solana": "sol",
         }
-        streams = "/".join(f"{symbol.lower()}@ticker" for symbol in binance_symbols)
-        binance_url = f"wss://stream.binance.com:9443/stream?streams={streams}"
+        req = urllib.request.Request("https://api.coinpaprika.com/v1/tickers", headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            items = json.loads(resp.read().decode())
 
-        prices_received = set()
-        ws = websocket.create_connection(binance_url, timeout=10)
+        for item in items:
+            key = paprika_map.get(item.get("id"))
+            if key:
+                quotes = item.get("quotes", {}).get("USD", {})
+                snapshot[key]["price"] = float(quotes.get("price") or 0.0)
+                snapshot[key]["change"] = float(quotes.get("percent_change_24h") or 0.0)
+                if snapshot[key]["price"] > 0 and not snapshot[key]["ohlc"]:
+                    snapshot[key]["ohlc"] = build_synthetic_ohlc(snapshot[key]["price"])
+
+        if all(c["price"] > 0 for c in snapshot.values()):
+            print("✅ Market data loaded from CoinPaprika.")
+            return snapshot
+    except Exception as err:
+        print(f"🚨 CoinPaprika fetch failed: {err}")
+
+    return None
+
+
+def fetch_news_headlines(top_coin_key):
+    feeds = [
+        ("CoinDesk", "https://www.coindesk.com/arc/outboundfeeds/rss/"),
+        ("Yahoo Finance", "https://finance.yahoo.com/news/rssindex"),
+        ("Cointelegraph", "https://cointelegraph.com/rss"),
+    ]
+    terms = COIN_META.get(top_coin_key, COIN_META["btc"])["terms"]
+    matched = []
+    general = []
+
+    for source_name, rss_url in feeds:
         try:
-            while prices_received != set(binance_symbols):
-                message = json.loads(ws.recv())
-                ticker = message.get("data", {})
-                symbol = ticker.get("s")
-                if symbol not in binance_symbols:
+            api_url = f"https://api.rss2json.com/v1/api.json?rss_url={urllib.parse.quote(rss_url, safe='')}"
+            req = urllib.request.Request(api_url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                payload = json.loads(resp.read().decode())
+            if payload.get("status") != "ok":
+                continue
+            for entry in payload.get("items", [])[:6]:
+                title = str(entry.get("title") or "").strip()
+                link = str(entry.get("link") or "").strip()
+                if not title:
                     continue
-                market_key = binance_symbols[symbol]
-                market_data[market_key]["price"] = float(ticker["c"])
-                market_data[market_key]["change"] = float(ticker["P"])
-                prices_received.add(symbol)
-        finally:
-            ws.close()
+                item_obj = {"source": source_name, "title": title, "link": link}
+                lower_t = title.lower()
+                if any(term in lower_t for term in terms):
+                    matched.append(item_obj)
+                else:
+                    general.append(item_obj)
+        except Exception:
+            continue
 
-        # Fallback OHLC builder from live spot prices if CoinGecko failed
-        base_time = int(time.time() * 1000) - (86400 * 1000)
-        for sym, data in market_data.items():
-            curr_price = data["price"]
-            if curr_price > 0 and not data["ohlc"]:
-                synthetic_candles = []
-                for i in range(24):
-                    t_stamp = base_time + (i * 3600 * 1000)
-                    o_val = curr_price * (1 + random.uniform(-0.01, 0.01))
-                    h_val = o_val * (1 + random.uniform(0.001, 0.008))
-                    l_val = o_val * (1 - random.uniform(0.001, 0.008))
-                    c_val = l_val + (h_val - l_val) * random.random()
-                    synthetic_candles.append([t_stamp, o_val, h_val, l_val, c_val])
-                data["ohlc"] = synthetic_candles
+    combined = matched + general
+    return combined[:2]
 
-        if len(prices_received) == len(binance_symbols):
-            data_acquired = True
-            print("Binance WebSocket ingestion & fallback OHLC complete.")
-    except Exception as e:
-        print(f"⚠️ Secondary Pipeline Blocked ({e}). Forwarding to Tertiary Tier...")
 
-# --- SOURCE 3: COINPAPRIKA PUBLIC API + SYNTHETIC FALLBACK OHLC ---
-if not data_acquired:
-    print("Tertiary Pipeline: Fetching live data from CoinPaprika API...")
-    try:
-        paprika_url = "https://api.coinpaprika.com/v1/tickers"
-        req = urllib.request.Request(paprika_url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=12) as response:
-            raw_json = json.loads(response.read().decode())
-            mapping = {
-                'btc-bitcoin': 'btc', 'eth-ethereum': 'eth', 
-                'bnb-binance-coin': 'bnb', 'xrp-xrp': 'xrp', 'sol-solana': 'sol'
-            }
-            for item in raw_json:
-                sym = mapping.get(item['id'])
-                if sym:
-                    market_data[sym]['price'] = float(item['quotes']['USD']['price'])
-                    market_data[sym]['change'] = float(item['quotes']['USD']['percent_change_24h'])
-            
-            base_time = int(time.time() * 1000) - (86400 * 1000)
-            for sym, data in market_data.items():
-                curr_price = data["price"]
-                if curr_price > 0 and not data["ohlc"]:
-                    synthetic_candles = []
-                    for i in range(24):
-                        t_stamp = base_time + (i * 3600 * 1000)
-                        o_val = curr_price * (1 + random.uniform(-0.01, 0.01))
-                        h_val = o_val * (1 + random.uniform(0.001, 0.008))
-                        l_val = o_val * (1 - random.uniform(0.001, 0.008))
-                        c_val = l_val + (h_val - l_val) * random.random()
-                        synthetic_candles.append([t_stamp, o_val, h_val, l_val, c_val])
-                    data["ohlc"] = synthetic_candles
-
-            if all(coin["price"] > 0 for coin in market_data.values()):
-                data_acquired = True
-                print("CoinPaprika ingestion complete.")
-    except Exception as e:
-        print(f"🚨 Tertiary Failure: All public data networks unresponsive ({e}).")
-
-if not data_acquired:
-    print("Safeguard Halt: Live market data unreachable. Terminating deployment loop.")
-    exit(0)
-
-# ==========================================
-# 5. SCAN BLOCKCHAIN FOR CRYPTO POST AUTHOR
-# ==========================================
 def scan_latest_crypto_post(blockchain_instance):
-    print("Scanning blockchain history for the latest crypto-related post...")
     try:
-        query = {"limit": 50, "tag": ""}
-        discussions = Discussions_by_created(query, blockchain_instance=blockchain_instance)
-        keyword_set = set(k.lower() for k in CRYPTO_KEYWORDS)
-
+        discussions = Discussions_by_created({"limit": 50, "tag": ""}, blockchain_instance=blockchain_instance)
+        kw_set = {k.lower() for k in CRYPTO_KEYWORDS}
         for post in discussions:
             author = post.get("author")
             permlink = post.get("permlink")
             tags = [t.lower() for t in post.get("tags", [])]
-
-            if author == MY_ACCOUNT:
-                continue
-
-            if keyword_set.intersection(tags):
-                print(f"Found matching crypto post by @{author} (Permlink: {permlink})")
+            if author and permlink and author != MY_ACCOUNT and kw_set.intersection(tags):
                 return {"author": author, "permlink": permlink}
-    except Exception as scan_err:
-        print(f"Warning: Exception encountered during blockchain scan: {scan_err}")
-
+    except Exception as err:
+        print(f"Warning during community post scan: {err}")
     return None
 
-# ==========================================
-# 6. STRUCTURE, GENERATE & COMPILE POST
-# ==========================================
-top_coin_key = max(market_data.keys(), key=lambda k: market_data[k]['change'])
-top_performer = market_data[top_coin_key]
+# =========================================================================
+# 5. DYNAMIC TITLE & BODY BUILDER (STRICTLY ALIGNED TO TOP COIN)
+# =========================================================================
+def format_price(val):
+    return f"${val:,.2f}" if val >= 1 else f"${val:.4f}"
 
-# ==========================================
-# EXPANDED TRIPLE-SIZE TITLE POOLS (30 NATURAL, NON-COLON TITLES PER COIN)
-# ==========================================
-coin_title_pools = {
-    'btc': [
-        "Bitcoin leads the charge once again",
-        "Here is why Bitcoin is catching everyone's eye today",
-        "Taking a quick look at Bitcoin's latest momentum",
-        "Bitcoin continues to set the pace across the market",
-        "How Bitcoin is shaping today's trading session",
-        "An honest look at where Bitcoin is heading next",
-        "Bitcoin refuses to slow down in today's market",
-        "Checking in on Bitcoin's steady climb",
-        "Why traders are keeping a close watch on Bitcoin",
-        "Bitcoin brings some fresh excitement to the charts",
-        "Breaking down today's interesting Bitcoin price action",
-        "Bitcoin holds its ground while the rest of the market shifts",
-        "A closer look at why Bitcoin is dominating discussions",
-        "Bitcoin puts on another strong display today",
-        "What the latest Bitcoin moves mean for the broader market",
-        "Bitcoin keeps the momentum going with a solid push",
-        "Reflecting on Bitcoin's strong performance today",
-        "Why early buyers are excited about Bitcoin right now",
-        "Bitcoin proves once again why it leads the pack",
-        "A fresh perspective on Bitcoin's daily chart action",
-        "Bitcoin stays resilient through today's market swings",
-        "Why Bitcoin remains the talk of the crypto community",
-        "Bitcoin surprises the market with another great run",
-        "Navigating today's trends with Bitcoin at the helm",
-        "A friendly reminder of why Bitcoin commands attention",
-        "Bitcoin delivers another day of reliable growth",
-        "Why everyone is talking about Bitcoin this morning",
-        "Bitcoin powers through resistance with style",
-        "Taking stock of Bitcoin's impressive weekly trend",
-        "Bitcoin keeps things interesting with today's price action"
-    ],
-    'eth': [
-        "Ethereum is quietly making some impressive moves",
-        "Catching up with Ethereum and the broader altcoin market",
-        "Ethereum is heating up nicely in today's session",
-        "Why Ethereum is drawing a crowd right now",
-        "Taking a walk through Ethereum's latest price swings",
-        "Ethereum leads the altcoin charge with confidence",
-        "Seeing some great momentum building on Ethereum",
-        "What is going on with Ethereum in today's market",
-        "Ethereum makes waves as trading volume picks up",
-        "A quick check on Ethereum's daily momentum",
-        "Ethereum shows solid resilience on a busy trading day",
-        "Why smart contract fans are buzzing about Ethereum",
-        "Ethereum puts on a clinic in today's market session",
-        "The latest updates on Ethereum's price action",
-        "Ethereum steps up its game as market interest grows",
-        "Why Ethereum is turning heads across the board",
-        "Taking stock of Ethereum's journey through the charts",
-        "Ethereum builds a strong case for today's top assets",
-        "How Ethereum is reacting to the current market climate",
-        "An insightful look at Ethereum's daily trajectory",
-        "Ethereum stays right in the middle of the action",
-        "Why traders are talking non-stop about Ethereum",
-        "Ethereum navigates today's volatility like a pro",
-        "A closer inspection of Ethereum's recent gains",
-        "Ethereum carves out an independent path today",
-        "What makes Ethereum's current price move so fascinating",
-        "Ethereum keeps up a steady and reliable pace",
-        "Why Ethereum supporters have plenty to smile about",
-        "Ethereum proves its worth in today's active session",
-        "Catching the latest ripples from the Ethereum ecosystem"
-    ],
-    'bnb': [
-        "BNB shows everyone how it is done today",
-        "Catching up with BNB and exchange tokens",
-        "BNB puts on a solid show in today's market",
-        "Why BNB stands out among the top performers",
-        "Taking a quick look at BNB's price action today",
-        "BNB makes some nice headway on the charts",
-        "Keeping a close eye on BNB as it leads the board",
-        "BNB is looking pretty strong in today's session",
-        "What is driving BNB's latest moves today",
-        "BNB holds its ground among the top gainers",
-        "BNB continues to impress with steady daily growth",
-        "Why utility token enthusiasts love what BNB is doing",
-        "BNB makes a notable impression in today's trading",
-        "A quick dive into BNB's latest market position",
-        "BNB shows genuine strength during today's session",
-        "Why BNB is earning praise across crypto forums",
-        "Taking a closer look at BNB's persistent momentum",
-        "BNB navigates market shifts with cool confidence",
-        "How BNB maintains its edge in today's economy",
-        "An overview of BNB's exciting performance today",
-        "BNB proves reliable when traders need it most",
-        "Why BNB draws positive attention from all sides",
-        "BNB makes its presence known in the upper charts",
-        "A fresh look at BNB's steady climb today",
-        "BNB holds strong against changing market winds",
-        "What is behind BNB's pleasant performance today",
-        "BNB delivers another day of solid market action",
-        "Why BNB is worth watching closely right now",
-        "BNB keeps the energy high in today's trading rounds",
-        "Reflecting on BNB's consistent daily progress"
-    ],
-    'xrp': [
-        "XRP makes some welcome noise in the market today",
-        "Seeing a nice push from XRP in today's session",
-        "Why XRP is stealing a bit of the spotlight",
-        "Catching up with XRP's latest price movements",
-        "XRP puts together a remarkably solid run",
-        "Taking a look at why XRP is leading the charts",
-        "XRP makes some interesting waves right now",
-        "A quick check on how XRP is holding up today",
-        "XRP shows some great energy in the market",
-        "What is happening with XRP in today's trading",
-        "XRP surprises skeptics with today's action",
-        "Why cross-border token interest centers on XRP",
-        "XRP steps up with a refreshing market display",
-        "A deep dive into XRP's dynamic price swings",
-        "XRP captures the enthusiasm of daily traders",
-        "Why conversations are picking up around XRP",
-        "Taking stock of XRP's lively journey on the charts",
-        "XRP proves it can hold its own in any session",
-        "How XRP manages to stand out right now",
-        "An encouraging look at XRP's latest performance",
-        "XRP keeps market watchers thoroughly engaged",
-        "Why community sentiment around XRP is looking up",
-        "XRP bounces back with notable style today",
-        "A friendly reminder of why XRP remains popular",
-        "XRP navigates daily ups and downs smoothly",
-        "What makes XRP's current movement worth noting",
-        "XRP delivers a pleasant surprise for holders",
-        "Why everyone seems to be tracking XRP today",
-        "XRP pushes forward with great momentum right now",
-        "Reflecting on XRP's vibrant trading session"
-    ],
-    'sol': [
-        "Solana flies high and leads the charge today",
-        "Checking out Solana's latest fast-paced moves",
-        "Solana puts on quite a show in the markets",
-        "Why Solana is outperforming the crowd today",
-        "Taking a look at Solana's incredible momentum",
-        "Solana catches a serious wave in today's session",
-        "What is pushing Solana to the front of the pack",
-        "Solana keeps things exciting in the market today",
-        "A quick check on Solana's impressive run",
-        "Solana shows off some serious strength today",
-        "Solana refuses to slow down its rapid pace",
-        "Why speed and efficiency bring eyes to Solana",
-        "Solana dominates conversation with stellar moves",
-        "A close look at Solana's blazing daily trajectory",
-        "Solana makes a strong statement in the crypto space",
-        "Why traders cannot stop talking about Solana",
-        "Taking an energetic ride through Solana's charts",
-        "Solana proves its network power in real-time pricing",
-        "How Solana leaves a mark on today's market",
-        "An exciting recap of Solana's phenomenal run",
-        "Solana keeps the market on the edge of its seat",
-        "Why momentum seekers lean toward Solana today",
-        "Solana charges ahead with remarkable confidence",
-        "A fresh look at why Solana scales new heights",
-        "Solana thrives amidst high market energy today",
-        "What fuels Solana's unstoppable momentum right now",
-        "Solana delivers a masterclass in daily performance",
-        "Why Solana is the coin everyone tracks today",
-        "Solana powers through resistance levels like a breeze",
-        "Reflecting on Solana's incredible day in the markets"
-    ]
-}
 
-# Select title based specifically on the top coin performer
-selected_pool = coin_title_pools.get(top_coin_key, coin_title_pools['btc'])
-post_title = random.choice(selected_pool)
+def build_coin_title_and_article(top_key, snapshot, headlines, formatted_date, timestamp_str):
+    coin = snapshot[top_key]
+    name = coin["name"]
+    sym = top_key.upper()
+    price_str = format_price(coin["price"])
+    change_val = coin["change"]
+    change_str = f"+{change_val:.2f}%" if change_val >= 0 else f"{change_val:.2f}%"
+    direction = "bullish momentum" if change_val >= 0 else "short-term pullback pressure"
 
-# Generate professional candlestick chart image
-local_banner_path = generate_candlestick_chart(
-    post_title=post_title,
-    top_coin_symbol=top_coin_key,
-    top_coin_name=top_performer['name'],
-    ohlc_data_list=top_performer['ohlc']
-)
+    other_leaders = sorted(
+        [(k, v) for k, v in snapshot.items() if k != top_key],
+        key=lambda kv: kv[1]["change"],
+        reverse=True,
+    )
+    runner_up_key, runner_up = other_leaders[0]
 
-uploaded_image_url = upload_image_to_cdn(local_banner_path)
-if not uploaded_image_url:
-    print("🚨 Critical: Image upload failed across all CDN tiers. Aborting post broadcast.")
+    ctx = {
+        "name": name,
+        "sym": sym,
+        "price_str": price_str,
+        "change_str": change_str,
+        "direction": direction,
+        "formatted_date": formatted_date,
+        "timestamp_str": timestamp_str,
+        "runner_up_name": runner_up["name"],
+        "runner_up_sym": runner_up_key.upper(),
+        "runner_up_price": format_price(runner_up["price"]),
+        "runner_up_change": f"{runner_up['change']:+.2f}%",
+    }
+
+    title_pool = TITLES_BY_COIN.get(top_key, TITLES_BY_COIN["btc"])
+    title = random.choice(title_pool).format(**ctx)
+
+    lead_body = random.choice(BODY_TEMPLATES).format(**ctx)
+    parts = [lead_body]
+
+    if headlines:
+        news_lines = []
+        for h in headlines:
+            if h["link"]:
+                news_lines.append(f"* **{h['source']}:** [{h['title']}]({h['link']})")
+            else:
+                news_lines.append(f"* **{h['source']}:** {h['title']}")
+        parts.append("### Market Headlines\n" + "\n".join(news_lines))
+
+    return title, "\n\n".join(parts)
+
+# =========================================================================
+# 6. MAIN EXECUTION
+# =========================================================================
+MY_PRIVATE_POSTING_KEY = os.getenv("STEEM_POSTING_KEY")
+if not MY_PRIVATE_POSTING_KEY:
+    print("Error: STEEM_POSTING_KEY secret is missing!")
     exit(1)
 
-now_eat = datetime.datetime.utcnow() + datetime.timedelta(hours=3)
-
-def get_ordinal_suffix(day):
-    if 11 <= day <= 13:
-        return "th"
-    return {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
-
-formatted_date = f"{now_eat.day}{get_ordinal_suffix(now_eat.day)} {now_eat.strftime('%A %B %Y')}"
-timestamp_utc = now_eat.strftime('%H:%M EAT')
-
-def format_row(key):
-    coin = market_data[key]
-    emoji = "🔺 +" if coin['change'] >= 0 else "🔻"
-    price_str = f"${coin['price']:,.2f}" if coin['price'] >= 1 else f"${coin['price']:.4f}"
-    return f"* 🪙 **{coin['name']} ({key.upper()}):** {price_str} | {emoji}{coin['change']:.2f}%"
-
-raw_slug = post_title.lower()
-clean_chars = [char if char.isalnum() or char.isspace() else "" for char in raw_slug]
-slug_str = "-".join("".join(clean_chars).split())
-post_permlink = f"{slug_str}-{now_eat.strftime('%Y%m%d')}"
-scanned_post_data = scan_latest_crypto_post(stm_check)
-
-print(f"✅ Dynamic Title Generated for [{top_coin_key.upper()}]: '{post_title}'")
-print(f"✅ Matching Permlink Slug compiled: '{post_permlink}'")
-
-body_lines = [
-    f"\n**{formatted_date}**  🕘 *{timestamp_utc}*\n",
-    "*Layout provided by [Steemit Enhancer hommage](https://chromewebstore.google.com/detail/empty-title/gepddagaajclednflogimfmpoejjkcnj) by ayogom*\n",
-    "⚠️FOR INFORMATION PURPOSES ONLY. NOT INVESTMENT ADVICE.\n",
-    "Latest Prices (The Big Five):\n",
-    format_row('btc'), format_row('eth'), format_row('bnb'), format_row('xrp'), format_row('sol'),
-    f"\n🔺**Top Gainer:** {top_coin_key.upper()}\n",
-    f"![{post_title}]({uploaded_image_url})",
-    f'<div class="footer">\n  <div class="pull-left">\n    Author: @blog.god\n  </div>\n  <div class="pull-right">\n    <img src="https://cdn.steemitimages.com/DQmeJV5dmDXBLXQHGxdfsDggpQNgBymH7wuuQSZ4pmyACVi/1000029381.png" alt="Footer" />\n  </div>\n</div>\n<div class="pull-left">\n  ©EGM 2016 - 2036\n</div>'
-]
-
-if scanned_post_data:
-    author = scanned_post_data["author"]
-    permlink = scanned_post_data["permlink"]
-    steemit_url = f"https://steemit.com/@{author}/{permlink}"
-    shoutout_text = f"A big shout-out to @{author} for keeping up with the crypto space today! Check out their latest update here: **[{permlink}]({steemit_url})**\n"
-    body_lines.insert(1, shoutout_text)
-
-post_body = "\n".join(body_lines)
-
-# ==========================================
-# 7. BLOCKCHAIN TRANSMISSION HANDSHAKE
-# ==========================================
 try:
-    print(f"Connecting to Steem nodes with automatic fallback enabled...")
     stm = Steem(node=STEEM_NODES, keys=[MY_PRIVATE_POSTING_KEY])
-    print(f"Posting on {TARGET_COMMUNITY}.")
-    
+    account_info = Account(MY_ACCOUNT, blockchain_instance=stm)
+    rc_manabar = account_info.get_rc_manabar()
+    current_rc = (rc_manabar["current_mana"] / rc_manabar["max_mana"]) * 100
+    print(f"@{MY_ACCOUNT} Resource Credits: {current_rc:.2f}%")
+
+    if current_rc < MIN_RC_THRESHOLD:
+        print(f"⚠️ Safety Halt: RC ({current_rc:.2f}%) below {MIN_RC_THRESHOLD}%.")
+        exit(0)
+
+    snapshot = fetch_market_snapshot()
+    if not snapshot:
+        print("Halting: Unable to fetch live market snapshot.")
+        exit(0)
+
+    top_coin_key = max(snapshot.keys(), key=lambda k: snapshot[k]["change"])
+    top_coin = snapshot[top_coin_key]
+    top_tag = top_coin_key.lower()
+
+    chart_file = generate_candlestick_chart(top_coin_key, top_coin["name"], top_coin["ohlc"])
+    image_url = upload_image_to_cdn(chart_file)
+    if not image_url:
+        print("🚨 Critical: Image upload failed. Aborting post.")
+        exit(1)
+
+    now_eat = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=3)
+    day = now_eat.day
+    suffix = "th" if 11 <= day <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
+    formatted_date = f"{day}{suffix} {now_eat.strftime('%A %B %Y')}"
+    timestamp_str = now_eat.strftime("%H:%M EAT")
+    current_year = now_eat.year
+
+    headlines = fetch_news_headlines(top_coin_key)
+    shoutout_post = scan_latest_crypto_post(stm)
+    shoutout_line = ""
+    if shoutout_post:
+        s_author = shoutout_post["author"]
+        s_permlink = shoutout_post["permlink"]
+        shoutout_line = f"A big shout-out to @{s_author} for keeping up with the crypto space today! Check out their latest update here: **[{s_permlink}](https://steemit.com/@{s_author}/{s_permlink})**"
+
+    post_title, article_body = build_coin_title_and_article(
+        top_coin_key, snapshot, headlines, formatted_date, timestamp_str
+    )
+
+    raw_slug = "".join(ch if ch.isalnum() or ch.isspace() else "" for ch in post_title.lower())
+    slug_part = "-".join(raw_slug.split())[:60]
+    post_permlink = f"{slug_part}-{now_eat.strftime('%Y%m%d%H%M')}"
+
+    rows = []
+    for k in ("btc", "eth", "bnb", "xrp", "sol"):
+        c = snapshot[k]
+        badge = "🔺" if c["change"] >= 0 else "🔻"
+        marker = " *(Lead)*" if k == top_coin_key else ""
+        rows.append(f"* {badge} **{c['name']} ({k.upper()}){marker}:** {format_price(c['price'])} ({c['change']:+.2f}%)")
+
+    body_sections = [
+        f"**{formatted_date}**  🕘 *{timestamp_str}*",
+        f"*Layout provided by [Steemit Enhancer hommage]({HOMMAGE_URL}) by ayogom*",
+        article_body,
+    ]
+    if shoutout_line:
+        body_sections.append(shoutout_line)
+
+    footer_block = (
+        f'<div class="footer">\n'
+        f'  <div class="pull-left">\n'
+        f'    Author: @{MY_ACCOUNT}\n'
+        f'  </div>\n'
+        f'  <div class="pull-right">\n'
+        f'    <img src="{FOOTER_IMAGE_URL}" alt="Footer" />\n'
+        f'  </div>\n'
+        f'</div>\n'
+        f'<div class="pull-left">\n'
+        f'  ©EGM {current_year}\n'
+        f'</div>'
+    )
+
+    body_sections.extend([
+        "### Snapshot (Major Assets)\n" + "\n".join(rows),
+        f"![{post_title}]({image_url})",
+        "> *Disclaimer: Market figures and news items are for informational purposes only and are not financial or investment advice.*",
+        footer_block,
+    ])
+
+    post_body = "\n\n".join(body_sections)
+
+    final_tags = []
+    for t in [TARGET_COMMUNITY, top_tag] + CUSTOM_TAGS:
+        clean_t = str(t).strip().lower()
+        if clean_t and clean_t not in final_tags:
+            final_tags.append(clean_t)
+
+    print(f"Publishing '{post_title}' with tags {final_tags}...")
     stm.post(
         title=post_title,
         body=post_body,
         author=MY_ACCOUNT,
         permlink=post_permlink,
-        tags=[TARGET_COMMUNITY] + CUSTOM_TAGS,
+        tags=final_tags,
         parent_author="",
-        parent_permlink=TARGET_COMMUNITY
+        parent_permlink=TARGET_COMMUNITY,
     )
-    print(f"✅ The Report has been Published on {TARGET_COMMUNITY} posts feed.")
+    print(f"✅ Successfully published to {TARGET_COMMUNITY}!")
+
 except Exception as e:
-    print(f"CRITICAL ERROR: Broadcast routing failed: {e}")
+    print(f"CRITICAL ERROR: {e}")
     exit(1)
